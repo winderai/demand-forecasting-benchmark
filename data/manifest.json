@@ -1,0 +1,82 @@
+[
+  {
+    "name": "UCI Online Retail II (id 502)",
+    "url": "https://archive.ics.uci.edu/static/public/502/online+retail+ii.zip",
+    "page": "https://archive.ics.uci.edu/dataset/502/online+retail+ii",
+    "licence": "Creative Commons Attribution 4.0 International (CC BY 4.0), as stated on the UCI page",
+    "file": "data/raw/online_retail_ii.zip",
+    "bytes": 45622418,
+    "sha256": "572e36277c2390fbfde10664750731e0a86f55e33470d91919085f0408e67bfb",
+    "downloaded_utc": "2026-10-20T11:52:24+00:00"
+  },
+  {
+    "name": "NESO Historic Demand Data 2024",
+    "url": "https://api.neso.energy/dataset/8f2fe0af-871c-488d-8bad-960426f24601/resource/f6d02c0f-957b-48cb-82ee-09003f2ba759/download/demanddata_2024.csv",
+    "page": "https://www.neso.energy/data-portal/historic-demand-data",
+    "licence": "NESO Open Data Licence (https://www.neso.energy/data-portal/ngeso-open-licence)",
+    "file": "data/raw/neso_demanddata_2024.csv",
+    "bytes": 1809707,
+    "sha256": "fa7895b6e9ab5eb1b450949d969cb18ffeb6005359fc71c79c87e1c47e59cac6",
+    "downloaded_utc": "2026-10-20T11:52:28+00:00"
+  },
+  {
+    "name": "NESO Historic Demand Data 2025",
+    "url": "https://api.neso.energy/dataset/8f2fe0af-871c-488d-8bad-960426f24601/resource/b2bde559-3455-4021-b179-dfe60c0337b0/download/demanddata_2025.csv",
+    "page": "https://www.neso.energy/data-portal/historic-demand-data",
+    "licence": "NESO Open Data Licence (https://www.neso.energy/data-portal/ngeso-open-licence)",
+    "file": "data/raw/neso_demanddata_2025.csv",
+    "bytes": 1869771,
+    "sha256": "8b8be946bbb084bc28fbf95a71fad0fceb5543b98e02755235130a42beaee4e0",
+    "downloaded_utc": "2026-10-20T11:52:32+00:00"
+  },
+  {
+    "name": "NESO Historic Demand Data 2026",
+    "url": "https://api.neso.energy/dataset/8f2fe0af-871c-488d-8bad-960426f24601/resource/8a4a771c-3929-4e56-93ad-cdf13219dea5/download/demanddataupdate_2026.csv",
+    "page": "https://www.neso.energy/data-portal/historic-demand-data",
+    "licence": "NESO Open Data Licence (https://www.neso.energy/data-portal/ngeso-open-licence)",
+    "file": "data/raw/neso_demanddata_2026.csv",
+    "bytes": 1392314,
+    "sha256": "ca97a05212846b3e755202a98aada7e3f12d668166fe2f5e0b8c5a1c1af5bb0b",
+    "downloaded_utc": "2026-10-20T11:52:36+00:00"
+  },
+  {
+    "name": "NESO Demand Data Update (daily, ~10 day settlement lag, latest actuals)",
+    "url": "https://api.neso.energy/dataset/7a12172a-939c-404c-b581-a6128b74f588/resource/177f6fa4-ae49-4182-81ea-0c6b35f26ca6/download/demanddataupdate.csv",
+    "page": "https://www.neso.energy/data-portal/daily-demand-update",
+    "licence": "NESO Open Data Licence (https://www.neso.energy/data-portal/ngeso-open-licence)",
+    "file": "data/raw/neso_demanddataupdate.csv",
+    "bytes": 273057,
+    "sha256": "01894edb99f0556efad0a29c77f7a3b7a9ecdba7061fcf7688a81fe110fa8690",
+    "downloaded_utc": "2026-10-20T11:52:39+00:00"
+  },
+  {
+    "name": "Elexon BMRS TEMP 2024-01-01 to 2024-12-31",
+    "url": "https://data.elexon.co.uk/bmrs/api/v1/temperature?from=2024-01-01&to=2024-12-31&format=json",
+    "page": "https://bmrs.elexon.co.uk/temperature",
+    "licence": "Elexon BMRS Data Licence; attribution required: 'Contains BMRS data (c) Elexon Limited copyright and database right 2026' (https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/)",
+    "file": "data/raw/bmrs_temp_2024-01-01_2024-12-31.json",
+    "bytes": 67497,
+    "sha256": "5ca2334af356f64e0075bd95a68fdda8885944b227c23c5583f3072c99d4b78f",
+    "downloaded_utc": "2026-10-20T11:56:38+00:00"
+  },
+  {
+    "name": "Elexon BMRS TEMP 2025-01-01 to 2025-12-31",
+    "url": "https://data.elexon.co.uk/bmrs/api/v1/temperature?from=2025-01-01&to=2025-12-31&format=json",
+    "page": "https://bmrs.elexon.co.uk/temperature",
+    "licence": "Elexon BMRS Data Licence; attribution required: 'Contains BMRS data (c) Elexon Limited copyright and database right 2026' (https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/)",
+    "file": "data/raw/bmrs_temp_2025-01-01_2025-12-31.json",
+    "bytes": 67711,
+    "sha256": "b3a6d3990b7acafedbc03180a86809d71289e3b1a201a7ec3fa94f51b3664c99",
+    "downloaded_utc": "2026-10-20T11:56:39+00:00"
+  },
+  {
+    "name": "Elexon BMRS TEMP 2026-01-01 to 2026-10-20",
+    "url": "https://data.elexon.co.uk/bmrs/api/v1/temperature?from=2026-01-01&to=2026-10-20&format=json",
+    "page": "https://bmrs.elexon.co.uk/temperature",
+    "licence": "Elexon BMRS Data Licence; attribution required: 'Contains BMRS data (c) Elexon Limited copyright and database right 2026' (https://www.elexon.co.uk/bsc/data/balancing-mechanism-reporting-agent/copyright-licence-bmrs-data/)",
+    "file": "data/raw/bmrs_temp_2026-01-01_2026-10-20.json",
+    "bytes": 54257,
+    "sha256": "7bb53374411ce70d6933d585d13b1cb0e4011a37e90be4aec047bd7472408f8d",
+    "downloaded_utc": "2026-10-20T11:56:40+00:00"
+  }
+]

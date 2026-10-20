@@ -1,0 +1,35 @@
+[project]
+name = "demand-forecasting-benchmark"
+version = "0.1.0"
+description = "Rolling-origin backtest of pretrained forecasters (Timestral, Chronos-2, TimesFM, t0) against seasonal naive, AutoETS, Croston/TSB and LightGBM on retail and GB grid demand."
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "numpy",
+    "pandas",
+    "pyarrow",
+    "openpyxl",
+    "requests",
+    "matplotlib",
+    "statsforecast",
+    "mlforecast",
+    "lightgbm",
+    "torch",
+    "timestral",
+    "chronos-forecasting",
+    "timesfm[torch]",
+    "tfc-t0[torch]",
+    "pytest",
+]
+
+[tool.uv.sources]
+timestral = { git = "https://github.com/mistralai/timestral.git", rev = "a534bdbd244d64f3d9d743f46c7bf6fc330ed4ff" }
+
+[tool.uv]
+package = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/forecastbench"]

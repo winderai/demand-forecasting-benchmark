@@ -1,0 +1,19 @@
+{
+  "target": "ND (national demand, MW): transmission demand excluding station load, pumping and exports",
+  "first_ds_utc": "2024-01-01 00:00:00+00:00",
+  "last_ds_utc": "2026-10-20 07:00:00+00:00",
+  "rows": 49119,
+  "missing_nd_half_hours": [
+    "2026-10-15 22:30:00+00:00",
+    "2026-10-15 23:00:00+00:00"
+  ],
+  "temperature_days_missing_filled_forward": [
+    "2024-08-21",
+    "2024-09-25",
+    "2026-10-20"
+  ],
+  "temperature_last_published_day": "2026-10-19",
+  "temperature_note": "Daily GB average temperature outturn (BMRS TEMP), repeated over the 48 half-hours of its local day. It is an actual, not a forecast: an oracle covariate.",
+  "neso_note": "NESO notes data issues on its Demand Data Update for 2026-10-03 to 2026-10-13 (under review on 2026-10-20); those days are used as published.",
+  "nd_mean_mw": 25931.966752855427
+}
