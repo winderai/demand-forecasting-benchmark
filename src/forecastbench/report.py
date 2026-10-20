@@ -475,6 +475,11 @@ def extrapolation_chart(forecasts: Path, path: Path) -> None:
     save(fig, path)
 
 
+def demo_id(model: str) -> str:
+    """Theory models always take temperature, so their demo ids drop the suffix."""
+    return model.replace("+temperature", "") if model.startswith("theory") else model
+
+
 def extend_demo(path: Path, summary: Summary, forecasts: Path, grid_lengths: list[int], retail_lengths: list[int]) -> None:
     payload = json.loads(path.read_text())
     grid = floor_curves(summary, [(n, f"grid_floor_L{n:04d}") for n in grid_lengths],
@@ -490,7 +495,7 @@ def extend_demo(path: Path, summary: Summary, forecasts: Path, grid_lengths: lis
                                              "t0-beta"]])
 
     def block(curves, lengths, key):
-        return {m: [sig(float(p[n][key])) if n in p else None for n in lengths] for m, p in curves.items()}
+        return {demo_id(m): [sig(float(p[n][key])) if n in p else None for n in lengths] for m, p in curves.items()}
 
     first = lambda curves: next(iter(next(iter(curves.values())).values()))  # noqa: E731
     payload["sweep_grid"] = {
@@ -522,14 +527,14 @@ def extend_demo(path: Path, summary: Summary, forecasts: Path, grid_lengths: lis
         "cutoffs": [{
             "cutoff": "2025-09-01", "leak_free": False, "t": [d.date().isoformat() for d in daily.index],
             "actual": [int(round(v)) for v in daily["actual"]],
-            "forecasts": {m: {k: [int(round(v)) for v in d[c]] for k, c in (("q10", "q10"), ("q50", "q50"), ("q90", "q90"))}
+            "forecasts": {demo_id(m): {k: [int(round(v)) for v in d[c]] for k, c in (("q10", "q10"), ("q50", "q50"), ("q90", "q90"))}
                           for m, d in models.items()},
         }],
     })
     payload["series"] = series
     known = {m["id"] for m in payload["models"]}
     for m in list(models) + list(grid) + list(retail):
-        if m not in known:
-            payload["models"].append({"id": m, "label": label(m)})
-            known.add(m)
+        if demo_id(m) not in known:
+            payload["models"].append({"id": demo_id(m), "label": label(demo_id(m))})
+            known.add(demo_id(m))
     path.write_text(json.dumps(payload, separators=(",", ":")))
