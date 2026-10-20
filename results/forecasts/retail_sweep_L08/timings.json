@@ -1,50 +1,110 @@
 {
   "seasonal-naive": {
     "load_s": 0.0,
-    "forecast_s": 0.04112266699939937,
-    "windows": 348,
-    "s_per_window": 0.0001181685833316074,
+    "forecast_s": 0.09325704199909524,
+    "windows": 342,
+    "s_per_window": 0.00027268140935407965,
     "torch_threads": 8,
-    "loadavg_1min_before": 95.5498046875,
-    "loadavg_1min_after": 95.5498046875,
+    "loadavg_1min_before": 66.61181640625,
+    "loadavg_1min_after": 66.61181640625,
     "quantile_crossings_before_sort": 0,
     "problems": [],
-    "finished_utc": "2026-10-20T13:01:52+00:00"
+    "finished_utc": "2026-10-20T13:10:13+00:00"
   },
   "timestral-5m": {
-    "load_s": 0.06968870800028526,
-    "forecast_s": 0.5380850419996932,
-    "windows": 348,
-    "s_per_window": 0.0015462213850565897,
+    "load_s": 0.2517193749990838,
+    "forecast_s": 0.6115272500010178,
+    "windows": 342,
+    "s_per_window": 0.001788091374271982,
     "torch_threads": 8,
-    "loadavg_1min_before": 93.58349609375,
-    "loadavg_1min_after": 92.97607421875,
+    "loadavg_1min_before": 72.8974609375,
+    "loadavg_1min_after": 72.8974609375,
     "quantile_crossings_before_sort": 0,
     "problems": [],
-    "finished_utc": "2026-10-20T13:01:58+00:00"
+    "finished_utc": "2026-10-20T13:10:21+00:00"
+  },
+  "timestral-209m": {
+    "load_s": 4.54102737500034,
+    "forecast_s": 14.393190208000306,
+    "windows": 342,
+    "s_per_window": 0.04208535148538101,
+    "torch_threads": 8,
+    "loadavg_1min_before": 112.3115234375,
+    "loadavg_1min_after": 125.59130859375,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:11:55+00:00"
   },
   "autoets": {
     "load_s": 0.0,
-    "forecast_s": 0.9069267079994461,
-    "windows": 348,
-    "s_per_window": 0.002606111229883466,
+    "forecast_s": 1.94559258299887,
+    "windows": 342,
+    "s_per_window": 0.005688867201751082,
     "torch_threads": 8,
-    "loadavg_1min_before": 65.35107421875,
-    "loadavg_1min_after": 65.35107421875,
+    "loadavg_1min_before": 133.31884765625,
+    "loadavg_1min_after": 132.732421875,
     "quantile_crossings_before_sort": 0,
     "problems": [],
-    "finished_utc": "2026-10-20T13:03:01+00:00"
+    "finished_utc": "2026-10-20T13:12:20+00:00"
   },
-  "timestral-209m": {
-    "load_s": 3.419081458000619,
-    "forecast_s": 10.029856209000172,
-    "windows": 348,
-    "s_per_window": 0.028821425887931528,
+  "chronos-2": {
+    "load_s": 0.3483197090008616,
+    "forecast_s": 3.303422542001499,
+    "windows": 342,
+    "s_per_window": 0.009659130239770466,
     "torch_threads": 8,
-    "loadavg_1min_before": 67.732421875,
-    "loadavg_1min_after": 62.76025390625,
+    "loadavg_1min_before": 150.802734375,
+    "loadavg_1min_after": 152.259765625,
+    "quantile_crossings_before_sort": 118,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:19:04+00:00"
+  },
+  "timesfm-2.5": {
+    "load_s": 6.917546915999992,
+    "forecast_s": 21.531650334000005,
+    "windows": 342,
+    "s_per_window": 0.06295804191228072,
+    "torch_threads": 8,
+    "loadavg_1min_before": 191.30078125,
+    "loadavg_1min_after": 199.06298828125,
     "quantile_crossings_before_sort": 0,
     "problems": [],
-    "finished_utc": "2026-10-20T13:03:05+00:00"
+    "finished_utc": "2026-10-20T13:21:13+00:00"
+  },
+  "lightgbm": {
+    "load_s": 0.0,
+    "forecast_s": 15.988716957999713,
+    "windows": 342,
+    "s_per_window": 0.04675063438011612,
+    "torch_threads": 8,
+    "loadavg_1min_before": 199.06298828125,
+    "loadavg_1min_after": 197.09130859375,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:21:25+00:00"
+  },
+  "timesfm-3": {
+    "load_s": 8.284751124998365,
+    "forecast_s": 20.96553012500044,
+    "windows": 342,
+    "s_per_window": 0.06130271966374398,
+    "torch_threads": 8,
+    "loadavg_1min_before": 195.25634765625,
+    "loadavg_1min_after": 187.8701171875,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:25:38+00:00"
+  },
+  "t0-gamma": {
+    "load_s": 4.253115084000456,
+    "forecast_s": 11.86367804099973,
+    "windows": 342,
+    "s_per_window": 0.03468911707894658,
+    "torch_threads": 8,
+    "loadavg_1min_before": 108.71240234375,
+    "loadavg_1min_after": 94.44091796875,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:27:46+00:00"
   }
 }

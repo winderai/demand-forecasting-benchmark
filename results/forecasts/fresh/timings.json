@@ -1,0 +1,86 @@
+{
+  "timestral-209m": {
+    "load_s": 2.6130701249985577,
+    "forecast_s": 8.202379457999996,
+    "windows": 400,
+    "s_per_window": 0.02050594864499999,
+    "torch_threads": 8,
+    "loadavg_1min_before": 12.34423828125,
+    "loadavg_1min_after": 11.435546875,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:38:26+00:00"
+  },
+  "chronos-2": {
+    "load_s": 0.20725566600049206,
+    "forecast_s": 5.02873366699896,
+    "windows": 400,
+    "s_per_window": 0.0125718341674974,
+    "torch_threads": 8,
+    "loadavg_1min_before": 13.21630859375,
+    "loadavg_1min_after": 14.47998046875,
+    "quantile_crossings_before_sort": 1,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:39:23+00:00"
+  },
+  "timesfm-3": {
+    "load_s": 5.1425893750001705,
+    "forecast_s": 16.35403020800004,
+    "windows": 400,
+    "s_per_window": 0.0408850755200001,
+    "torch_threads": 8,
+    "loadavg_1min_before": 15.26953125,
+    "loadavg_1min_after": 14.17529296875,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:39:59+00:00"
+  },
+  "seasonal-naive": {
+    "load_s": 0.0,
+    "forecast_s": 0.03356225000061386,
+    "windows": 400,
+    "s_per_window": 8.390562500153465e-05,
+    "torch_threads": 8,
+    "loadavg_1min_before": 15.21337890625,
+    "loadavg_1min_after": 15.21337890625,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:40:19+00:00"
+  },
+  "autoets": {
+    "load_s": 0.0,
+    "forecast_s": 34.81100191600126,
+    "windows": 400,
+    "s_per_window": 0.08702750479000315,
+    "torch_threads": 8,
+    "loadavg_1min_before": 15.21337890625,
+    "loadavg_1min_after": 26.87744140625,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:40:54+00:00"
+  },
+  "lightgbm": {
+    "load_s": 0.0,
+    "forecast_s": 13.210759374998815,
+    "windows": 400,
+    "s_per_window": 0.03302689843749704,
+    "torch_threads": 8,
+    "loadavg_1min_before": 26.87744140625,
+    "loadavg_1min_after": 36.58447265625,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:41:07+00:00"
+  },
+  "t0-gamma": {
+    "load_s": 5.544393209000191,
+    "forecast_s": 16.389917291999154,
+    "windows": 400,
+    "s_per_window": 0.040974793229997884,
+    "torch_threads": 8,
+    "loadavg_1min_before": 36.45751953125,
+    "loadavg_1min_after": 40.50439453125,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:41:31+00:00"
+  }
+}

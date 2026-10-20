@@ -1,0 +1,14 @@
+{
+  "timestral-209m+calendar": {
+    "load_s": 3.8512812919998396,
+    "forecast_s": 328.5698665,
+    "windows": 1332,
+    "s_per_window": 0.24667407394894894,
+    "torch_threads": 8,
+    "loadavg_1min_before": 139.4169921875,
+    "loadavg_1min_after": 150.7978515625,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:18:29+00:00"
+  }
+}

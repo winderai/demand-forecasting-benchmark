@@ -1,0 +1,6 @@
+ets-aaa on grid_historic: 34.0s for 28 windows (load 0.0s, loadavg 20) 
+ets-aaa on grid_leakfree: 5.7s for 5 windows (load 0.0s, loadavg 22) 
+ets-aaa on grid_sweep_L0048: 0.1s for 12 windows (load 0.0s, loadavg 21) 
+ets-aaa on grid_sweep_L0336: 1.1s for 12 windows (load 0.0s, loadavg 21) 
+ets-aaa on grid_sweep_L1344: 4.3s for 12 windows (load 0.0s, loadavg 23) 
+ets-aaa on grid_sweep_L4032: 13.0s for 12 windows (load 0.0s, loadavg 23) 

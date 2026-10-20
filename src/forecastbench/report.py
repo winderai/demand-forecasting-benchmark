@@ -18,6 +18,7 @@ from forecastbench.scoring import Task  # noqa: E402
 LABELS = {
     "seasonal-naive": "Seasonal naive",
     "autoets": "AutoETS (spreadsheet stand-in)",
+    "ets-aaa": "ETS(A,A,A) (Excel FORECAST.ETS structure)",
     "croston": "Croston (optimised)",
     "tsb": "TSB",
     "lightgbm": "LightGBM (global, fitted)",
@@ -31,7 +32,7 @@ LABELS = {
     "t0-gamma": "t0-gamma",
     "t0-beta": "t0-beta",
 }
-FITTED = {"autoets", "croston", "tsb", "lightgbm", "lightgbm-context-only"}
+FITTED = {"autoets", "ets-aaa", "croston", "tsb", "lightgbm", "lightgbm-context-only"}
 BASELINES = {"seasonal-naive"}
 INK = "#0b0b0b"
 MUTED = "#52514e"
@@ -40,9 +41,9 @@ COLOURS = {"baseline": "#8a8984", "fitted": "#eb6834", "pretrained": "#2a78d6"}
 LINES = {
     "seasonal-naive": "#8a8984", "autoets": "#eb6834", "lightgbm": "#4a3aa7", "lightgbm-context-only": "#4a3aa7",
     "timestral-209m": "#2a78d6", "timestral-5m": "#1baf7a", "chronos-2": "#e87ba4", "t0-gamma": "#008300",
-    "timesfm-3": "#eda100", "timesfm-2.5": "#e34948",
+    "timesfm-3": "#eda100", "timesfm-2.5": "#e34948", "ets-aaa": "#8a5a00",
 }
-SWEEP_MODELS = ["seasonal-naive", "autoets", "lightgbm", "lightgbm-context-only", "timestral-5m", "timestral-209m",
+SWEEP_MODELS = ["seasonal-naive", "autoets", "ets-aaa", "lightgbm", "lightgbm-context-only", "timestral-5m", "timestral-209m",
                 "chronos-2", "timesfm-2.5", "timesfm-3", "t0-gamma"]
 
 
@@ -126,9 +127,12 @@ def bars(summary: Summary, out: Path) -> None:
                 ok = np.isfinite(lo) & np.isfinite(hi)
                 ax.errorbar(values[ok], y[ok], xerr=[values[ok] - lo[ok], hi[ok] - values[ok]], fmt="none",
                             ecolor=INK, elinewidth=0.8, capsize=2)
-            for yi, v in zip(y, values):
+            ends = values.copy()
+            if metric == "relative_mase_geomean":
+                ends = np.where(np.isfinite(hi), np.maximum(values, hi), values)
+            for yi, v, e in zip(y, values, ends):
                 if np.isfinite(v):
-                    ax.text(v, yi, f" {v:.2f}", va="center", fontsize=7, color=INK)
+                    ax.text(e, yi, f"  {v:.2f}", va="center", fontsize=7, color=INK)
             ax.axvline(1.0, color=MUTED, linewidth=0.8, linestyle="--")
             ax.set_yticks(y)
             ax.set_yticklabels([label(m) for m in t["model"]] if c == 0 else [], fontsize=8, color=INK)
@@ -137,10 +141,11 @@ def bars(summary: Summary, out: Path) -> None:
                 ax.set_title(title, loc="left", fontsize=10, color=INK)
     handles = [plt.Rectangle((0, 0), 1, 1, color=COLOURS[k]) for k in ("baseline", "fitted", "pretrained")]
     fig.legend(handles, ["Baseline", "Fitted per cut-off", "Pretrained (zero-shot)"], loc="lower center", ncol=3,
-               frameon=False, fontsize=8)
-    fig.text(0.01, 0.005, "Lower is better. Geometric mean over windows; bars on MASE are 95% series-bootstrap "
-             "intervals. " + summary.machine + ", CPU.", fontsize=7, color=MUTED)
-    fig.tight_layout(rect=(0, 0.04, 1, 1))
+               frameon=False, fontsize=8, bbox_to_anchor=(0.5, 0.025))
+    fig.text(0.01, 0.002, "Lower is better. MASE: geometric mean over windows of the ratio to seasonal naive, with "
+             "95% series-bootstrap intervals. WQL: pooled. Temperature is the day's measured GB average (an oracle).",
+             fontsize=7, color=MUTED)
+    fig.tight_layout(rect=(0, 0.06, 1, 1))
     save(fig, out / "results_bars")
 
 
@@ -159,7 +164,8 @@ def sweep_curves(summary: Summary, prefix: str, lengths: list[int]) -> dict:
     return curves
 
 
-def sweep_chart(curves: dict, lengths: list[int], unit: str, title: str, path: Path, ticks: list[str]) -> None:
+def sweep_chart(curves: dict, lengths: list[int], unit: str, title: str, path: Path, ticks: list[str],
+                footnote: str) -> None:
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.2))
     for ax, key, ylabel in zip(axes, ["relmase", "relwql"],
                                ["MASE relative to seasonal naive (full history)", "WQL relative to seasonal naive"]):
@@ -173,8 +179,12 @@ def sweep_chart(curves: dict, lengths: list[int], unit: str, title: str, path: P
             dashed = family(model) == "fitted"
             ax.plot(xs, ys, color=LINES.get(model, INK), linewidth=2, marker="o", markersize=5,
                     linestyle="--" if dashed else "-", label=label(model))
-            ax.text(xs[-1], ys[-1], "  " + label(model).split(" (")[0], fontsize=7, color=INK, va="center")
         ax.set_xscale("log")
+        if key == "relwql":
+            ax.set_yscale("log")
+            ax.set_yticks([0.5, 0.7, 1, 2, 5, 10])
+            ax.set_yticklabels(["0.5", "0.7", "1", "2", "5", "10"], fontsize=8)
+            ax.minorticks_off()
         ax.set_xticks(lengths)
         ax.set_xticklabels(ticks, fontsize=8)
         ax.minorticks_off()
@@ -182,8 +192,9 @@ def sweep_chart(curves: dict, lengths: list[int], unit: str, title: str, path: P
         ax.set_ylabel(ylabel, fontsize=8, color=MUTED)
     axes[0].set_title(title, loc="left", fontsize=10, color=INK)
     handles, names = axes[0].get_legend_handles_labels()
-    fig.legend(handles, names, loc="lower center", ncol=4, frameon=False, fontsize=8)
-    fig.tight_layout(rect=(0, 0.12, 1, 1))
+    fig.legend(handles, names, loc="lower center", ncol=4, frameon=False, fontsize=8, bbox_to_anchor=(0.5, 0.04))
+    fig.text(0.01, 0.005, footnote, fontsize=7, color=MUTED)
+    fig.tight_layout(rect=(0, 0.16, 1, 1))
     save(fig, path)
 
 
@@ -338,6 +349,8 @@ def pick_products(forecasts: Path, products: pd.DataFrame, cutoffs: list[str]) -
     take(full.sort_values("mean", ascending=False), "best-seller", "Dense, high-volume product with two years of history", 2)
     take(st.sort_values("start", ascending=False), "new product", "Launched shortly before the cut-offs: little history", 2)
     take(full[full["mean"] > 3].sort_values("zeros", ascending=False), "intermittent", "Most weeks sell nothing", 2)
-    take(full[full["mean"] > 5].sort_values("xmas_share", ascending=False), "Christmas item", "Most of 2010's sales came in November and December", 2)
+    on_sale_all_2010 = full[(full["mean"] > 5) & (full["start"] <= pd.Timestamp("2010-01-31"))]
+    take(on_sale_all_2010.sort_values("xmas_share", ascending=False), "Nov-Dec seller",
+         "On sale all of 2010, yet most of that year's sales came in November and December", 2)
     take(full.sample(frac=1.0, random_state=7), "typical", "A randomly drawn product from the sample", 4)
     return chosen

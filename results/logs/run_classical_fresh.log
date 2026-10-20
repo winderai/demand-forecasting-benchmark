@@ -1,0 +1,4 @@
+seasonal-naive: cached
+autoets: cached
+lightgbm: cached
+lightgbm: cached

@@ -1,0 +1,9 @@
+{
+  "series_total": 50000,
+  "series_with_varying_discount_in_eval_week": 34074,
+  "sampled": 400,
+  "seed": 2026,
+  "eval_days_with_a_stockout_hour": 1221,
+  "eval_days": 2800,
+  "note": "sale_amount is globally rescaled by the publisher; sales on stock-out days are censored demand"
+}

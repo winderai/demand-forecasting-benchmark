@@ -1,0 +1,86 @@
+{
+  "timestral-5m": {
+    "load_s": 0.17833950000022014,
+    "forecast_s": 1.0982720000010886,
+    "windows": 5,
+    "s_per_window": 0.21965440000021771,
+    "torch_threads": 8,
+    "loadavg_1min_before": 47.736328125,
+    "loadavg_1min_after": 47.736328125,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:28:53+00:00"
+  },
+  "timestral-209m": {
+    "load_s": 3.5293815419991006,
+    "forecast_s": 9.657803707999847,
+    "windows": 5,
+    "s_per_window": 1.9315607415999694,
+    "torch_threads": 8,
+    "loadavg_1min_before": 25.3310546875,
+    "loadavg_1min_after": 23.3291015625,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:30:46+00:00"
+  },
+  "chronos-2": {
+    "load_s": 0.13099816700014344,
+    "forecast_s": 2.881558541999766,
+    "windows": 5,
+    "s_per_window": 0.5763117083999532,
+    "torch_threads": 8,
+    "loadavg_1min_before": 22.7294921875,
+    "loadavg_1min_after": 22.7294921875,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:31:22+00:00"
+  },
+  "timesfm-3": {
+    "load_s": 5.208451749998858,
+    "forecast_s": 8.84424883400061,
+    "windows": 5,
+    "s_per_window": 1.768849766800122,
+    "torch_threads": 8,
+    "loadavg_1min_before": 16.8369140625,
+    "loadavg_1min_after": 15.17041015625,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:34:33+00:00"
+  },
+  "t0-gamma": {
+    "load_s": 3.5464301249994605,
+    "forecast_s": 10.272496958999909,
+    "windows": 5,
+    "s_per_window": 2.0544993917999816,
+    "torch_threads": 8,
+    "loadavg_1min_before": 15.71142578125,
+    "loadavg_1min_after": 18.2568359375,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:36:24+00:00"
+  },
+  "lightgbm": {
+    "load_s": 0.0,
+    "forecast_s": 32.466117791000215,
+    "windows": 5,
+    "s_per_window": 6.493223558200043,
+    "torch_threads": 8,
+    "loadavg_1min_before": 14.52734375,
+    "loadavg_1min_after": 14.423828125,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:37:57+00:00"
+  },
+  "t0-beta": {
+    "load_s": 3.9294752919995517,
+    "forecast_s": 7.610077084000295,
+    "windows": 5,
+    "s_per_window": 1.522015416800059,
+    "torch_threads": 8,
+    "loadavg_1min_before": 14.423828125,
+    "loadavg_1min_after": 13.5888671875,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:38:03+00:00"
+  }
+}

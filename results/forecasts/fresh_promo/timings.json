@@ -1,0 +1,62 @@
+{
+  "timestral-209m": {
+    "load_s": 2.6130701249985577,
+    "forecast_s": 51.71849425000073,
+    "windows": 400,
+    "s_per_window": 0.12929623562500184,
+    "torch_threads": 8,
+    "loadavg_1min_before": 11.435546875,
+    "loadavg_1min_after": 13.21630859375,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:39:17+00:00"
+  },
+  "chronos-2": {
+    "load_s": 0.20725566600049206,
+    "forecast_s": 14.542288499998904,
+    "windows": 400,
+    "s_per_window": 0.03635572124999726,
+    "torch_threads": 8,
+    "loadavg_1min_before": 14.47998046875,
+    "loadavg_1min_after": 15.119140625,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:39:37+00:00"
+  },
+  "timesfm-3": {
+    "load_s": 5.1425893750001705,
+    "forecast_s": 70.21813745799955,
+    "windows": 400,
+    "s_per_window": 0.17554534364499885,
+    "torch_threads": 8,
+    "loadavg_1min_before": 14.17529296875,
+    "loadavg_1min_after": 36.58447265625,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:41:09+00:00"
+  },
+  "lightgbm": {
+    "load_s": 0.0,
+    "forecast_s": 20.508361750000404,
+    "windows": 400,
+    "s_per_window": 0.05127090437500101,
+    "torch_threads": 8,
+    "loadavg_1min_before": 36.58447265625,
+    "loadavg_1min_after": 35.93505859375,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:41:27+00:00"
+  },
+  "t0-gamma": {
+    "load_s": 5.544393209000191,
+    "forecast_s": 36.114058832999945,
+    "windows": 400,
+    "s_per_window": 0.09028514708249986,
+    "torch_threads": 8,
+    "loadavg_1min_before": 40.50439453125,
+    "loadavg_1min_after": 26.82568359375,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:42:07+00:00"
+  }
+}

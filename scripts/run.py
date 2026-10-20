@@ -158,6 +158,7 @@ def main() -> None:
         jobs = [
             (C.SeasonalNaive("seasonal-naive", 336), plain + sweep),
             (C.Statistical("autoets", AutoETS(season_length=48), "AutoETS", "30min", THREADS, True), plain + sweep),
+            (C.Statistical("ets-aaa", AutoETS(season_length=48, model="AAA"), "AutoETS", "30min", 1, True), plain + sweep),
             (C.GridLightGBM("lightgbm", backtest, GRID_TRAINING_DAYS, lags, 200, LIGHTGBM_THREADS, SEED, False), plain),
             (C.GridLightGBM("lightgbm", backtest, GRID_TRAINING_DAYS, lags, 200, LIGHTGBM_THREADS, SEED, True), with_temperature),
             (C.GridLightGBM("lightgbm-context-only", backtest, None, lags, 200, LIGHTGBM_THREADS, SEED, False), sweep),

@@ -104,6 +104,17 @@ def main() -> None:
         "context_lengths": sorted({int(x) for x in longest["context_length"]}),
         "components": {c: components.count(c) for c in set(components)},
     }
+    grid = Task(Path("results/forecasts/grid_historic")).windows()
+    frame = pd.read_parquet("data/prepared/grid_halfhourly.parquet").set_index("ds")
+    chosen = {}
+    for i in [0, 8, 15, 25]:
+        cut = pd.Timestamp(grid.loc[i, "cutoff"])
+        ctx = frame.loc[frame.index < cut, "ND"].to_numpy(dtype=float)[-4096:]
+        chosen[grid.loc[i, "cutoff"]] = {
+            "autoets_zzz": AutoETS(season_length=48).fit(ctx).model_["components"],
+            "ets_aaa": AutoETS(season_length=48, model="AAA").fit(ctx).model_["components"],
+        }
+    out["autoets_grid_components"] = chosen
     Path("results/sanity.json").write_text(json.dumps(out, indent=2))
     print(json.dumps({k: v for k, v in out.items() if k != "forecasts"}, indent=2))
     bad = {k: v for k, v in finite.items() if v["nan"] or not v["ordered"]}

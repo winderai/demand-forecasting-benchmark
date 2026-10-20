@@ -1,0 +1,118 @@
+[
+  {
+    "code": "15036",
+    "role": "best-seller",
+    "note": "Dense, high-volume product with two years of history",
+    "cutoffs": [
+      "2011-08-14",
+      "2011-09-11",
+      "2011-10-09"
+    ]
+  },
+  {
+    "code": "84755",
+    "role": "best-seller",
+    "note": "Dense, high-volume product with two years of history",
+    "cutoffs": [
+      "2011-08-14",
+      "2011-09-11",
+      "2011-10-09"
+    ]
+  },
+  {
+    "code": "23189",
+    "role": "new product",
+    "note": "Launched shortly before the cut-offs: little history",
+    "cutoffs": [
+      "2011-10-09"
+    ]
+  },
+  {
+    "code": "23374",
+    "role": "new product",
+    "note": "Launched shortly before the cut-offs: little history",
+    "cutoffs": [
+      "2011-10-09"
+    ]
+  },
+  {
+    "code": "16054",
+    "role": "intermittent",
+    "note": "Most weeks sell nothing",
+    "cutoffs": [
+      "2011-08-14",
+      "2011-09-11",
+      "2011-10-09"
+    ]
+  },
+  {
+    "code": "20838",
+    "role": "intermittent",
+    "note": "Most weeks sell nothing",
+    "cutoffs": [
+      "2011-08-14",
+      "2011-09-11",
+      "2011-10-09"
+    ]
+  },
+  {
+    "code": "22142",
+    "role": "Christmas item",
+    "note": "On sale all of 2010, yet most of that year's sales came in November and December",
+    "cutoffs": [
+      "2011-08-14",
+      "2011-09-11",
+      "2011-10-09"
+    ]
+  },
+  {
+    "code": "17012B",
+    "role": "Christmas item",
+    "note": "On sale all of 2010, yet most of that year's sales came in November and December",
+    "cutoffs": [
+      "2011-08-14",
+      "2011-09-11",
+      "2011-10-09"
+    ]
+  },
+  {
+    "code": "23004",
+    "role": "typical",
+    "note": "A randomly drawn product from the sample",
+    "cutoffs": [
+      "2011-08-14",
+      "2011-09-11",
+      "2011-10-09"
+    ]
+  },
+  {
+    "code": "22052",
+    "role": "typical",
+    "note": "A randomly drawn product from the sample",
+    "cutoffs": [
+      "2011-08-14",
+      "2011-09-11",
+      "2011-10-09"
+    ]
+  },
+  {
+    "code": "22452",
+    "role": "typical",
+    "note": "A randomly drawn product from the sample",
+    "cutoffs": [
+      "2011-08-14",
+      "2011-09-11",
+      "2011-10-09"
+    ]
+  },
+  {
+    "code": "21041",
+    "role": "typical",
+    "note": "A randomly drawn product from the sample",
+    "cutoffs": [
+      "2011-08-14",
+      "2011-09-11",
+      "2011-10-09"
+    ]
+  }
+]

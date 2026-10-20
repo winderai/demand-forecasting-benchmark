@@ -69,12 +69,13 @@ def main() -> None:
         if not models:
             continue
         head = "| Model | " + " | ".join(f"L={x}" for x in lengths) + " |"
-        lines = [f"### History-length sweep ({prefix[:-3]}, {unit}; {n[0]} windows, {n[1]} series)\n",
-                 "Relative MASE / relative WQL (seasonal naive with the longest history = 1):\n", head,
+        lines = [f"### History-length sweep ({prefix[:-2]}, {unit}; {n[0]} windows, {n[1]} series)\n",
+                 "Relative MASE (geometric mean) / relative WQL (pooled) / mean MASE; seasonal naive with the "
+                 "longest history = 1 for the two relative figures:\n", head,
                  "|" + "---|" * (len(lengths) + 1)]
         for m, v in sorted(models.items()):
             lines.append(f"| {label(m)} | " + " | ".join(
-                f"{fmt(v[x][0])} / {fmt(v[x][1])}" if x in v else "n/a" for x in lengths) + " |")
+                f"{fmt(v[x][0])} / {fmt(v[x][1])} / {fmt(v[x][2])}" if x in v else "n/a" for x in lengths) + " |")
         out.append("\n".join(lines) + "\n")
     Path("results/tables.md").write_text("\n".join(out))
     print("\n".join(out))
