@@ -538,7 +538,7 @@ class RetailTransferLightGBM:
         keys = windows.keys()
         for cutoff in sorted(set(cutoffs)):
             rows = np.where(cutoffs == cutoff)[0]
-            mlf, names = self._model(pd.Timestamp(cutoff), windows.freq, h)
+            mlf, names = self._model(pd.Timestamp(str(cutoff)), windows.freq, h)
             wanted = [keys[i] for i in rows]
             new = frame[frame["unique_id"].isin(wanted)][["unique_id", "ds", "y"]]
             pred = mlf.predict(h=h, new_df=new).set_index("unique_id").loc[wanted]

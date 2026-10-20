@@ -31,8 +31,12 @@ LABELS = {
     "timesfm-3": "TimesFM 3 (non-commercial weights)",
     "t0-gamma": "t0-gamma",
     "t0-beta": "t0-beta",
+    "theory-context": "Theory model, fitted on the context",
+    "theory-prior-2024": "Theory model, structure from 2024",
+    "lightgbm-transfer": "LightGBM (trained on 600 other products)",
+    "lightgbm-no-lags": "LightGBM (calendar, no lags)",
 }
-FITTED = {"autoets", "ets-aaa", "croston", "tsb", "lightgbm", "lightgbm-context-only"}
+FITTED = {"autoets", "ets-aaa", "theory-context", "theory-prior-2024", "lightgbm-transfer", "lightgbm-no-lags", "croston", "tsb", "lightgbm", "lightgbm-context-only"}
 BASELINES = {"seasonal-naive"}
 INK = "#0b0b0b"
 MUTED = "#52514e"
@@ -354,3 +358,178 @@ def pick_products(forecasts: Path, products: pd.DataFrame, cutoffs: list[str]) -
          "On sale all of 2010, yet most of that year's sales came in November and December", 2)
     take(full.sample(frac=1.0, random_state=7), "typical", "A randomly drawn product from the sample", 4)
     return chosen
+
+
+FLOOR_GRID_MODELS = [
+    ("seasonal-naive", ""), ("ets-aaa", ""), ("lightgbm-context-only", "_temp"), ("theory-context", "_temp"),
+    ("theory-prior-2024", "_temp"), ("timestral-5m", "_temp"), ("timestral-209m", "_temp"), ("chronos-2", "_temp"),
+    ("timesfm-2.5", ""), ("timesfm-3", "_temp"), ("t0-gamma", "_temp"),
+]
+FLOOR_COLOURS = {**LINES, "theory-context": "#1baf7a", "theory-prior-2024": "#008300", "t0-gamma": "#4a3aa7",
+                 "lightgbm-context-only": "#e87ba4", "lightgbm-transfer": "#e34948", "lightgbm": "#e87ba4",
+                 "chronos-2": "#9085e9"}
+
+
+def floor_curves(summary: Summary, tasks: list[tuple[int, str]], models: list[tuple[str, str]]) -> dict:
+    """{model: {length: row}} for (length, task name) pairs; suffix picks the covariate task."""
+    curves: dict = {}
+    for n, name in tasks:
+        for model, suffix in models:
+            t = summary.table(name + suffix)
+            if t.empty or model not in set(t["model"]):
+                continue
+            row = t[t["model"] == model].iloc[0]
+            curves.setdefault(model + ("+temperature" if suffix else ""), {})[n] = row
+    return curves
+
+
+def floor_chart(curves: dict, lengths: list[int], ticks: list[str], unit: str, title: str, footnote: str,
+                path: Path, highlight: str, mase_key: str = "relative_mase_geomean",
+                mase_label: str = "MASE relative to seasonal naive") -> None:
+    fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.6))
+    for ax, key, ylabel in zip(axes, [mase_key, "relative_wql_pooled"],
+                               [mase_label, "WQL relative to seasonal naive"]):
+        style(ax)
+        ax.grid(axis="y", color=GRID, linewidth=0.8)
+        for model, points in curves.items():
+            base = model.split("+")[0]
+            xs = [n for n in lengths if n in points]
+            ys = [float(points[n][key]) for n in xs]
+            dashed = family(base) == "fitted"
+            width = 3 if model == highlight else 1.6
+            ax.plot(xs, ys, color=FLOOR_COLOURS.get(base, INK), linewidth=width, marker="o", markersize=4,
+                    linestyle="--" if dashed else "-", label=label(model))
+            if model == highlight and key == "relative_mase_geomean":
+                lo = [points[n]["relative_mase_ci95"][0] for n in xs]
+                hi = [points[n]["relative_mase_ci95"][1] for n in xs]
+                ax.fill_between(xs, lo, hi, color=FLOOR_COLOURS.get(base, INK), alpha=0.15, linewidth=0)
+        ax.axhline(1.0, color=MUTED, linewidth=0.8, linestyle=":")
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.set_xticks(lengths)
+        ax.set_xticklabels(ticks, fontsize=8)
+        ax.set_yticks([0.3, 0.5, 0.7, 1, 2, 3, 5])
+        ax.set_yticklabels(["0.3", "0.5", "0.7", "1", "2", "3", "5"], fontsize=8)
+        ax.minorticks_off()
+        ax.set_xlabel(f"History given to every model ({unit})", fontsize=8, color=MUTED)
+        ax.set_ylabel(ylabel, fontsize=8, color=MUTED)
+    axes[0].set_title(title, loc="left", fontsize=10, color=INK)
+    handles, names = axes[0].get_legend_handles_labels()
+    fig.legend(handles, names, loc="lower center", ncol=3, frameon=False, fontsize=8, bbox_to_anchor=(0.5, 0.04))
+    fig.text(0.01, 0.005, footnote, fontsize=7, color=MUTED)
+    fig.tight_layout(rect=(0, 0.23, 1, 1))
+    save(fig, path)
+
+
+EXTRAP_MODELS = [("seasonal-naive", ""), ("ets-aaa", ""), ("lightgbm-no-lags", "_temp"), ("theory-context", "_temp"),
+                 ("theory-prior-2024", "_temp"), ("timestral-209m", "_temp"), ("chronos-2", "_temp"),
+                 ("timesfm-3", "_temp"), ("t0-gamma", "_temp")]
+
+
+def extrapolation_daily(forecasts: Path) -> tuple[pd.DataFrame, dict]:
+    """Daily (UK local day) means of the actual series and of each model's quantiles, Sep-Nov 2025."""
+    grid = pd.read_parquet("data/prepared/grid_halfhourly.parquet").set_index("ds")
+    plain = Task(forecasts / "extrap_long")
+    temp = Task(forecasts / "extrap_long_temp")
+    meta = plain.windows()
+    cut = pd.Timestamp(meta["cutoff"].iloc[0])
+    horizon = plain.targets().shape[1]
+    dates = pd.date_range(cut, periods=horizon, freq="30min")
+    day = dates.tz_convert("Europe/London").tz_localize(None).normalize()
+    actual = grid["ND"].reindex(dates).to_numpy()
+    frame = pd.DataFrame({"day": day, "actual": actual, "temperature": grid["temperature"].reindex(dates).to_numpy()})
+    models = {}
+    for model, suffix in EXTRAP_MODELS:
+        task = temp if suffix else plain
+        if model not in task.models():
+            continue
+        q = task.quantiles(model)[0]
+        name = model + ("+temperature" if suffix else "")
+        models[name] = pd.DataFrame({"day": day, "q10": q[:, 0], "q50": q[:, 4], "q90": q[:, 8]}).groupby("day").mean()
+    return frame.groupby("day").mean(), models
+
+
+def extrapolation_chart(forecasts: Path, path: Path) -> None:
+    daily, models = extrapolation_daily(forecasts)
+    fig, (ax, axt) = plt.subplots(2, 1, figsize=(11, 6.2), sharex=True, gridspec_kw={"height_ratios": [3, 1]})
+    style(ax)
+    style(axt)
+    ax.grid(axis="y", color=GRID, linewidth=0.8)
+    scored = daily.index >= pd.Timestamp("2025-10-01")
+    ax.axvspan(daily.index[scored][0], daily.index[-1], color="#f3f2ee", zorder=0)
+    ax.text(daily.index[scored][0], daily["actual"].max(), "  scored: 1 Oct-30 Nov", fontsize=8, color=MUTED, va="top")
+    ax.plot(daily.index, daily["actual"], color=INK, linewidth=2.6, label="Actual")
+    for name, d in models.items():
+        base = name.split("+")[0]
+        ax.plot(d.index, d["q50"], color=FLOOR_COLOURS.get(base, INK), linewidth=1.6,
+                linestyle="--" if family(base) == "fitted" else "-", label=label(name))
+    ax.set_ylabel("Daily mean national demand (MW)", fontsize=8, color=MUTED)
+    ax.set_title("Forecast from summer only (context 1 Jun-31 Aug 2025), one run to 30 Nov; median, daily means",
+                 loc="left", fontsize=10, color=INK)
+    axt.plot(daily.index, daily["temperature"], color=MUTED, linewidth=1.5)
+    axt.set_ylabel("GB mean temp. (C)", fontsize=8, color=MUTED)
+    axt.grid(axis="y", color=GRID, linewidth=0.8)
+    handles, names = ax.get_legend_handles_labels()
+    fig.legend(handles, names, loc="lower center", ncol=4, frameon=False, fontsize=8)
+    fig.tight_layout(rect=(0, 0.1, 1, 1))
+    save(fig, path)
+
+
+def extend_demo(path: Path, summary: Summary, forecasts: Path, grid_lengths: list[int], retail_lengths: list[int]) -> None:
+    payload = json.loads(path.read_text())
+    grid = floor_curves(summary, [(n, f"grid_floor_L{n:04d}") for n in grid_lengths],
+                        [(m, "") for m in ["seasonal-naive", "ets-aaa", "lightgbm-context-only", "timestral-5m",
+                                           "timestral-209m", "chronos-2", "timesfm-2.5", "timesfm-3", "t0-gamma",
+                                           "t0-beta"]]
+                        + [(m, "_temp") for m in ["lightgbm-context-only", "theory-context", "theory-prior-2024",
+                                                 "timestral-5m", "timestral-209m", "chronos-2", "timesfm-3",
+                                                 "t0-gamma", "t0-beta"]])
+    retail = floor_curves(summary, [(n, f"retail_floor_L{n:02d}") for n in retail_lengths],
+                          [(m, "") for m in ["seasonal-naive", "autoets", "lightgbm-transfer", "timestral-5m",
+                                             "timestral-209m", "chronos-2", "timesfm-2.5", "timesfm-3", "t0-gamma",
+                                             "t0-beta"]])
+
+    def block(curves, lengths, key):
+        return {m: [sig(float(p[n][key])) if n in p else None for n in lengths] for m, p in curves.items()}
+
+    first = lambda curves: next(iter(next(iter(curves.values())).values()))  # noqa: E731
+    payload["sweep_grid"] = {
+        "lengths_halfhours": grid_lengths, "n_windows": int(first(grid)["windows"]),
+        "relmase": block(grid, grid_lengths, "relative_mase_geomean"),
+        "relwql": block(grid, grid_lengths, "relative_wql_pooled"),
+        "note": "baseline = seasonal naive (same half-hour last week) with 7 days; null = cannot fit",
+    }
+    payload["sweep_retail_floor"] = {
+        "lengths_weeks": retail_lengths, "n_series": int(first(retail)["series"]),
+        "n_windows": int(first(retail)["windows"]),
+        "relmase": block(retail, retail_lengths, "relative_mase_geomean"),
+        "relwql": block(retail, retail_lengths, "relative_wql_pooled"),
+        "note": "same products, targets and baseline as sweep; null = cannot fit",
+    }
+    daily, models = extrapolation_daily(forecasts)
+    g = pd.read_parquet("data/prepared/grid_halfhourly.parquet").set_index("ds")
+    start = pd.Timestamp("2025-06-01", tz="Europe/London").tz_convert("UTC")
+    cut = pd.Timestamp("2025-09-01", tz="Europe/London").tz_convert("UTC")
+    summer = g.loc[(g.index >= start) & (g.index < cut), "ND"]
+    hist = summer.groupby(summer.index.tz_convert("Europe/London").tz_localize(None).normalize()).mean()
+    series = [x for x in payload["series"] if x["id"] != "grid-extrapolation"]
+    series.append({
+        "id": "grid-extrapolation", "label": "GB national demand: summer history, autumn forecast",
+        "kind": "grid", "freq": "D",
+        "note": "Daily means. Every model saw only 1 Jun-31 Aug 2025 and forecast to 30 Nov in one run; "
+                "scored on 1 Oct-30 Nov. Temperature (measured, an oracle) given to models that take it.",
+        "history": {"t": [d.date().isoformat() for d in hist.index], "y": [int(round(v)) for v in hist]},
+        "cutoffs": [{
+            "cutoff": "2025-09-01", "leak_free": False, "t": [d.date().isoformat() for d in daily.index],
+            "actual": [int(round(v)) for v in daily["actual"]],
+            "forecasts": {m: {k: [int(round(v)) for v in d[c]] for k, c in (("q10", "q10"), ("q50", "q50"), ("q90", "q90"))}
+                          for m, d in models.items()},
+        }],
+    })
+    payload["series"] = series
+    known = {m["id"] for m in payload["models"]}
+    for m in list(models) + list(grid) + list(retail):
+        if m not in known:
+            payload["models"].append({"id": m, "label": label(m)})
+            known.add(m)
+    path.write_text(json.dumps(payload, separators=(",", ":")))

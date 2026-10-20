@@ -1,0 +1,6 @@
+{
+  "products": 600,
+  "drawn_from": 4368,
+  "seed": 2026,
+  "note": "LightGBM-transfer trains on these products' full histories up to each cut-off; none of them is in the 300-product evaluation sample"
+}

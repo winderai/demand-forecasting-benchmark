@@ -2,6 +2,7 @@
 
 import argparse
 import json
+
 import os
 import platform
 import re
@@ -9,9 +10,11 @@ import subprocess
 from importlib import metadata
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
-from forecastbench.scoring import Task, aggregate
+from forecastbench.metrics import geometric_mean_ratio
+from forecastbench.scoring import Task, aggregate, bootstrap_ratio
 
 BASELINE = "seasonal-naive"
 BOOTSTRAP_REPS = 2000
@@ -31,6 +34,14 @@ REPOS = {
 
 
 def baseline_task(name: str) -> str:
+    if name.startswith("grid_floor_"):
+        return "grid_floor_L0336"
+    if name.startswith("retail_floor_"):
+        return "retail_sweep_L78"
+    if name.startswith("retail300_floor_"):
+        return "retail"
+    if name.startswith("extrap_"):
+        return name.replace("_temp", "")
     if name.startswith("retail_sweep_"):
         return "retail_sweep_L78"
     if name.startswith("grid_sweep_"):
@@ -62,6 +73,48 @@ def environment() -> dict:
     }
 
 
+PAIRS = {
+    "grid": [("timestral-209m", "_temp", "lightgbm-context-only", "_temp"),
+             ("timestral-209m", "_temp", "theory-prior-2024", "_temp"),
+             ("timestral-209m", "_temp", "theory-context", "_temp"),
+             ("timestral-209m", "", "seasonal-naive", ""),
+             ("timestral-5m", "_temp", "lightgbm-context-only", "_temp"),
+             ("timestral-5m", "_temp", "theory-prior-2024", "_temp"),
+             ("timestral-5m", "_temp", "theory-context", "_temp"),
+             ("timestral-5m", "", "seasonal-naive", "")],
+    "retail": [("timestral-209m", "", "seasonal-naive", ""), ("timestral-209m", "", "lightgbm-transfer", ""),
+               ("timestral-5m", "", "seasonal-naive", ""), ("timestral-5m", "", "lightgbm-transfer", "")],
+}
+
+
+def pairs(scores: dict) -> list[dict]:
+    """Head-to-head geometric-mean MASE ratios on the same windows, with a bootstrap 95% interval."""
+    out = []
+    for name in sorted(scores):
+        kind = "grid" if name.startswith("grid_floor_") and not name.endswith("_temp") else (
+            "retail" if "_floor_" in name and not name.startswith("grid") else None)
+        if kind is None:
+            continue
+        for model, ma, rival, ra in PAIRS[kind]:
+            a = scores.get(name + ma)
+            b = scores.get(name + ra)
+            if a is None or b is None or model not in set(a["model"]) or rival not in set(b["model"]):
+                out.append({"task": name, "model": model + ma, "rival": rival + ra, "ratio": None,
+                            "note": "rival or model has no forecasts at this length (cannot fit)"})
+                continue
+            x = a[a["model"] == model].set_index("key")["mase"]
+            y = b[b["model"] == rival].set_index("key")["mase"].loc[x.index]
+            groups = a[a["model"] == model].set_index("key")["series"].loc[x.index].to_numpy()
+            if len(set(groups)) < 2:
+                groups = x.index.to_numpy()
+            ratio, n = geometric_mean_ratio(x.to_numpy(), y.to_numpy())
+            out.append({"task": name, "model": model + ma.replace("_temp", "+temperature"),
+                        "rival": rival + ra.replace("_temp", "+temperature"), "ratio": ratio, "pairs": n,
+                        "ratio_of_mean_mase": float(np.nanmean(x.to_numpy()) / np.nanmean(y.to_numpy())),
+                        "ci95": bootstrap_ratio(x.to_numpy(), y.to_numpy(), groups, BOOTSTRAP_REPS, SEED)})
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--forecasts", type=Path, default=Path("results/forecasts"))
@@ -87,13 +140,20 @@ def main() -> None:
         table["point_only"] = table["model"].isin(POINT_ONLY)
         for col in ["coverage_10_90", "units_short_at_p90", "units_excess_at_p90"]:
             table.loc[table["point_only"], col] = None
+        same = name.replace("_temp", "")
+        if (name.startswith("grid_floor_") or "_floor_" in name) and same in scores:
+            local = aggregate(scores[name], scores[same], BASELINE, BOOTSTRAP_REPS, SEED).set_index("model")
+            table["relative_mase_vs_same_length_naive"] = table["model"].map(local["relative_mase_geomean"])
+            table["relative_mase_vs_same_length_naive_ci95"] = table["model"].map(local["relative_mase_ci95"])
         table = table.sort_values("relative_mase_geomean")
         tables[name] = {
             "baseline": f"{BASELINE} on task {base}",
             "rows": json.loads(table.to_json(orient="records")),
             "failures": task.failures(),
         }
+    summary_pairs = pairs(scores)
     summary = {
+        "floor_pairs": summary_pairs,
         "run_date_utc": pd.Timestamp.now(tz="UTC").isoformat(timespec="seconds"),
         "environment": environment(),
         "data": json.loads(Path("data/manifest.json").read_text()),

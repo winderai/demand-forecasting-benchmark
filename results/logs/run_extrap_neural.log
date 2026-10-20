@@ -1,0 +1,25 @@
+timesfm-2.5 on extrap_long: 4.9s for 1 windows (load 1.4s, loadavg 4) 
+timestral-5m on extrap_long: 0.2s for 1 windows (load 0.1s, loadavg 4) 
+timestral-5m on extrap_long_temp: 0.4s for 1 windows (load 0.1s, loadavg 4) 
+timestral-5m on extrap_dayahead: 1.0s for 61 windows (load 0.1s, loadavg 4) 
+timestral-5m on extrap_dayahead_temp: 3.9s for 61 windows (load 0.1s, loadavg 4) 
+timestral-209m on extrap_long: 2.0s for 1 windows (load 1.4s, loadavg 4) 
+timestral-209m on extrap_long_temp: 6.7s for 1 windows (load 1.4s, loadavg 4) 
+timestral-209m on extrap_dayahead: 22.5s for 61 windows (load 1.4s, loadavg 4) 
+timestral-209m on extrap_dayahead_temp: 88.5s for 61 windows (load 1.4s, loadavg 5) 
+W1020 15:37:24.087000 93366 torch/distributed/elastic/multiprocessing/redirects.py:35] NOTE: Redirects are currently not supported in MacOs.
+Loading weights:   0%|          | 0/170 [00:00<?, ?it/s]Loading weights: 100%|██████████| 170/170 [00:00<00:00, 3895.54it/s]
+chronos-2 on extrap_long: 8.1s for 1 windows (load 0.1s, loadavg 6) 
+chronos-2 on extrap_long_temp: 13.9s for 1 windows (load 0.1s, loadavg 6) 
+chronos-2 on extrap_dayahead: 13.4s for 61 windows (load 0.1s, loadavg 6) 
+chronos-2 on extrap_dayahead_temp: 23.8s for 61 windows (load 0.1s, loadavg 6) 
+timesfm-3 on extrap_long: 0.9s for 1 windows (load 2.7s, loadavg 6) 
+timesfm-3 on extrap_long_temp: 1.6s for 1 windows (load 2.7s, loadavg 6) 
+t0-gamma on extrap_long: 13.5s for 1 windows (load 2.3s, loadavg 6) 
+t0-gamma on extrap_long_temp: 26.4s for 1 windows (load 2.3s, loadavg 5) 
+t0-gamma on extrap_dayahead: 30.5s for 61 windows (load 2.3s, loadavg 5) 
+t0-gamma on extrap_dayahead_temp: 62.6s for 61 windows (load 2.3s, loadavg 5) 
+t0-beta on extrap_long: 11.6s for 1 windows (load 2.3s, loadavg 11) 
+t0-beta on extrap_long_temp: 22.0s for 1 windows (load 2.3s, loadavg 10) 
+t0-beta on extrap_dayahead: 26.0s for 61 windows (load 2.3s, loadavg 8) 
+t0-beta on extrap_dayahead_temp: 51.9s for 61 windows (load 2.3s, loadavg 7) 

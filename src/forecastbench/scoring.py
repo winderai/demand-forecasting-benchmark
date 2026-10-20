@@ -110,6 +110,7 @@ def aggregate(scores: pd.DataFrame, baseline_scores: pd.DataFrame, baseline: str
             "target_points": int(g["points"].sum()),
             "mase_mean": float(np.nanmean(g["mase"])),
             "mase_median": float(np.nanmedian(g["mase"])),
+            "relative_mase_of_means": float(np.nanmean(g["mase"]) / np.nanmean(b["mase"])),
             "wql_pooled": pooled,
             "relative_mase_geomean": rel_mase,
             "relative_mase_ci95": bootstrap_ratio(g["mase"].to_numpy(), b["mase"].to_numpy(), groups, reps, seed),

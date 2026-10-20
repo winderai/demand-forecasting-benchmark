@@ -1,0 +1,8 @@
+lightgbm-transfer on retail_floor_L01: 282.6s for 342 windows (load 0.0s, loadavg 4) 
+lightgbm-transfer on retail_floor_L02: 1.4s for 342 windows (load 0.0s, loadavg 14) 
+lightgbm-transfer on retail_floor_L04: 1.3s for 342 windows (load 0.0s, loadavg 14) 
+lightgbm-transfer on retail_floor_L08: 1.3s for 342 windows (load 0.0s, loadavg 14) 
+lightgbm-transfer on retail300_floor_L01: 1.8s for 1332 windows (load 0.0s, loadavg 13) 
+lightgbm-transfer on retail300_floor_L02: 2.0s for 1332 windows (load 0.0s, loadavg 13) 
+lightgbm-transfer on retail300_floor_L04: 2.1s for 1332 windows (load 0.0s, loadavg 13) 
+lightgbm-transfer on retail300_floor_L08: 2.3s for 1332 windows (load 0.0s, loadavg 13) 

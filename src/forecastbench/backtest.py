@@ -41,6 +41,11 @@ class Store:
     def keep(self, model: str, quantiles: np.ndarray, timing: dict) -> None:
         np.savez_compressed(self._dir / f"{model}.npz", quantiles=quantiles.astype(np.float32))
         self._merge("timings.json", model, timing)
+        failures = self._dir / "failures.json"
+        if failures.exists():
+            data = json.loads(failures.read_text())
+            if data.pop(model, None) is not None:
+                failures.write_text(json.dumps(data, indent=2))
 
     def fail(self, model: str, error: str) -> None:
         self._merge("failures.json", model, {"error": error})
