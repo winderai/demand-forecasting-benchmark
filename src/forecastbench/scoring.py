@@ -90,6 +90,30 @@ def bootstrap_ratio(model: np.ndarray, baseline: np.ndarray, groups: np.ndarray,
     return [float(np.percentile(ratios, 2.5)), float(np.percentile(ratios, 97.5))]
 
 
+def mean_ratio(model: np.ndarray, baseline: np.ndarray) -> tuple[float, int]:
+    """Ratio of mean MASE over windows where both are finite."""
+    ok = np.isfinite(model) & np.isfinite(baseline)
+    if not ok.any() or np.mean(baseline[ok]) == 0:
+        return float("nan"), 0
+    return float(np.mean(model[ok]) / np.mean(baseline[ok])), int(ok.sum())
+
+
+def bootstrap_mean_ratio(model: np.ndarray, baseline: np.ndarray, groups: np.ndarray, reps: int,
+                         seed: int) -> list[float]:
+    """95% interval of the ratio of means, resampling whole series and recomputing the ratio."""
+    ok = np.isfinite(model) & np.isfinite(baseline)
+    g = groups[ok]
+    names, inverse = np.unique(g, return_inverse=True)
+    if len(names) < 2:
+        return [float("nan"), float("nan")]
+    top = np.bincount(inverse, weights=model[ok])
+    bottom = np.bincount(inverse, weights=baseline[ok])
+    rng = np.random.default_rng(seed)
+    draws = rng.integers(0, len(names), size=(reps, len(names)))
+    ratios = top[draws].sum(axis=1) / bottom[draws].sum(axis=1)
+    return [float(np.percentile(ratios, 2.5)), float(np.percentile(ratios, 97.5))]
+
+
 def aggregate(scores: pd.DataFrame, baseline_scores: pd.DataFrame, baseline: str, reps: int, seed: int) -> pd.DataFrame:
     """One row per model: raw metrics, and ratios to the baseline model on the same windows."""
     base = baseline_scores[baseline_scores["model"] == baseline].set_index("key")
@@ -100,9 +124,9 @@ def aggregate(scores: pd.DataFrame, baseline_scores: pd.DataFrame, baseline: str
         ql_cols = [f"ql_{lv:.1f}" for lv in LEVELS]
         pooled = float(np.mean(g[ql_cols].sum().to_numpy() / g["abs_target"].sum()))
         pooled_base = float(np.mean(b[ql_cols].sum().to_numpy() / b["abs_target"].sum()))
+        groups = g["series"].to_numpy() if g["series"].nunique() > 1 else g.index.to_numpy()
         rel_mase, n_mase = metrics.geometric_mean_ratio(g["mase"].to_numpy(), b["mase"].to_numpy())
         rel_wql, n_wql = metrics.geometric_mean_ratio(g["wql"].to_numpy(), b["wql"].to_numpy())
-        groups = g["series"].to_numpy() if g["series"].nunique() > 1 else g.index.to_numpy()
         rows.append({
             "model": model,
             "windows": int(len(g)),
@@ -110,7 +134,9 @@ def aggregate(scores: pd.DataFrame, baseline_scores: pd.DataFrame, baseline: str
             "target_points": int(g["points"].sum()),
             "mase_mean": float(np.nanmean(g["mase"])),
             "mase_median": float(np.nanmedian(g["mase"])),
-            "relative_mase_of_means": float(np.nanmean(g["mase"]) / np.nanmean(b["mase"])),
+            "relative_mase_of_means": mean_ratio(g["mase"].to_numpy(), b["mase"].to_numpy())[0],
+            "relative_mase_of_means_ci95": bootstrap_mean_ratio(g["mase"].to_numpy(), b["mase"].to_numpy(), groups,
+                                                                reps, seed),
             "wql_pooled": pooled,
             "relative_mase_geomean": rel_mase,
             "relative_mase_ci95": bootstrap_ratio(g["mase"].to_numpy(), b["mase"].to_numpy(), groups, reps, seed),

@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 
 from forecastbench.metrics import geometric_mean_ratio
-from forecastbench.scoring import Task, aggregate, bootstrap_ratio
+from forecastbench.scoring import Task, aggregate, bootstrap_mean_ratio, bootstrap_ratio, mean_ratio
 
 BASELINE = "seasonal-naive"
 BOOTSTRAP_REPS = 2000
@@ -73,45 +73,64 @@ def environment() -> dict:
     }
 
 
-PAIRS = {
-    "grid": [("timestral-209m", "_temp", "lightgbm-context-only", "_temp"),
-             ("timestral-209m", "_temp", "theory-prior-2024", "_temp"),
-             ("timestral-209m", "_temp", "theory-context", "_temp"),
-             ("timestral-209m", "", "seasonal-naive", ""),
-             ("timestral-5m", "_temp", "lightgbm-context-only", "_temp"),
-             ("timestral-5m", "_temp", "theory-prior-2024", "_temp"),
-             ("timestral-5m", "_temp", "theory-context", "_temp"),
-             ("timestral-5m", "", "seasonal-naive", "")],
-    "retail": [("timestral-209m", "", "seasonal-naive", ""), ("timestral-209m", "", "lightgbm-transfer", ""),
-               ("timestral-5m", "", "seasonal-naive", ""), ("timestral-5m", "", "lightgbm-transfer", "")],
-}
+RETAIL_RIVALS = ["lightgbm", "autoets", "chronos-2", "seasonal-naive"]
+FLOOR_RIVALS = ["seasonal-naive", "lightgbm-transfer", "autoets", "chronos-2"]
+GRID_PAIRS = [("_temp", "lightgbm-context-only", "_temp"), ("_temp", "theory-prior-2024", "_temp"),
+              ("_temp", "theory-context", "_temp"), ("", "seasonal-naive", "")]
+
+
+def head_to_head() -> list[tuple[str, str, str, str, str]]:
+    """(task of model, model, task of rival, rival, label) for every comparison reported."""
+    out = []
+    retail = [("retail", "timestral-209m", "retail", r) for r in RETAIL_RIVALS]
+    retail += [("retail_calendar", "timestral-209m+calendar", "retail", r) for r in ["timestral-209m"] + RETAIL_RIVALS]
+    retail += [("fresh", "timestral-209m", "fresh", r) for r in ["lightgbm", "autoets", "chronos-2", "seasonal-naive"]]
+    retail += [("fresh_promo", "timestral-209m", "fresh_promo", "lightgbm"),
+               ("fresh_promo", "timestral-209m", "fresh", "timestral-209m")]
+    for n in [8, 13, 26, 52, 78]:
+        t = f"retail_sweep_L{n:02d}"
+        retail += [(t, "timestral-209m", t, r) for r in RETAIL_RIVALS]
+    for prefix in ["retail_floor_L", "retail300_floor_L"]:
+        for n in [1, 2, 4, 8]:
+            t = f"{prefix}{n:02d}"
+            for model in ["timestral-209m", "timestral-5m"]:
+                retail += [(t, model, t, r) for r in FLOOR_RIVALS]
+    out += retail
+    for n in [12, 24, 48, 96, 144, 336]:
+        t = f"grid_floor_L{n:04d}"
+        for model in ["timestral-209m", "timestral-5m"]:
+            out += [(t + ma, model, t + ra, rival) for ma, rival, ra in GRID_PAIRS]
+    return out
+
+
+def tag(task: str, model: str) -> str:
+    if task.endswith("_temp"):
+        return model + "+temperature"
+    if task == "fresh_promo":
+        return model + "+promo"
+    return model
 
 
 def pairs(scores: dict) -> list[dict]:
-    """Head-to-head geometric-mean MASE ratios on the same windows, with a bootstrap 95% interval."""
+    """Head-to-head MASE ratios on the same windows: ratio of means and geometric mean, with series-bootstrap CIs."""
     out = []
-    for name in sorted(scores):
-        kind = "grid" if name.startswith("grid_floor_") and not name.endswith("_temp") else (
-            "retail" if "_floor_" in name and not name.startswith("grid") else None)
-        if kind is None:
+    for mt, model, rt, rival in head_to_head():
+        a, b = scores.get(mt), scores.get(rt)
+        entry = {"task": mt.replace("_temp", ""), "model": tag(mt, model), "rival": tag(rt, rival)}
+        if a is None or b is None or model not in set(a["model"]) or rival not in set(b["model"]):
+            out.append({**entry, "ratio_of_mean_mase": None, "ratio": None,
+                        "note": "rival or model has no forecasts here (cannot fit or not run)"})
             continue
-        for model, ma, rival, ra in PAIRS[kind]:
-            a = scores.get(name + ma)
-            b = scores.get(name + ra)
-            if a is None or b is None or model not in set(a["model"]) or rival not in set(b["model"]):
-                out.append({"task": name, "model": model + ma, "rival": rival + ra, "ratio": None,
-                            "note": "rival or model has no forecasts at this length (cannot fit)"})
-                continue
-            x = a[a["model"] == model].set_index("key")["mase"]
-            y = b[b["model"] == rival].set_index("key")["mase"].loc[x.index]
-            groups = a[a["model"] == model].set_index("key")["series"].loc[x.index].to_numpy()
-            if len(set(groups)) < 2:
-                groups = x.index.to_numpy()
-            ratio, n = geometric_mean_ratio(x.to_numpy(), y.to_numpy())
-            out.append({"task": name, "model": model + ma.replace("_temp", "+temperature"),
-                        "rival": rival + ra.replace("_temp", "+temperature"), "ratio": ratio, "pairs": n,
-                        "ratio_of_mean_mase": float(np.nanmean(x.to_numpy()) / np.nanmean(y.to_numpy())),
-                        "ci95": bootstrap_ratio(x.to_numpy(), y.to_numpy(), groups, BOOTSTRAP_REPS, SEED)})
+        x = a[a["model"] == model].set_index("key")
+        y = b[b["model"] == rival].set_index("key").loc[x.index]
+        groups = x["series"].to_numpy() if x["series"].nunique() > 1 else x.index.to_numpy()
+        xm, ym = x["mase"].to_numpy(), y["mase"].to_numpy()
+        means, n = mean_ratio(xm, ym)
+        geo, ngeo = geometric_mean_ratio(xm, ym)
+        out.append({**entry, "ratio_of_mean_mase": means, "pairs": n,
+                    "ratio_of_mean_mase_ci95": bootstrap_mean_ratio(xm, ym, groups, BOOTSTRAP_REPS, SEED),
+                    "ratio": geo, "geometric_pairs": ngeo,
+                    "ci95": bootstrap_ratio(xm, ym, groups, BOOTSTRAP_REPS, SEED)})
     return out
 
 
@@ -153,7 +172,7 @@ def main() -> None:
         }
     summary_pairs = pairs(scores)
     summary = {
-        "floor_pairs": summary_pairs,
+        "head_to_head": summary_pairs,
         "run_date_utc": pd.Timestamp.now(tz="UTC").isoformat(timespec="seconds"),
         "environment": environment(),
         "data": json.loads(Path("data/manifest.json").read_text()),

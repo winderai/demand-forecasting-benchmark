@@ -55,7 +55,7 @@ def label(model: str) -> str:
     if model in LABELS:
         return LABELS[model]
     base, _, extra = model.partition("+")
-    extras = {"temperature": "+ temperature", "promo": "+ discount, holiday, activity"}
+    extras = {"temperature": "+ temperature", "promo": "+ discount, holiday, activity", "calendar": "+ calendar covariates"}
     return f"{LABELS.get(base, base)} {extras.get(extra, '+ ' + extra)}"
 
 
@@ -104,35 +104,36 @@ class Summary:
 
 
 def bars(summary: Summary, out: Path) -> None:
+    mean = ("relative_mase_of_means", "relative_mase_of_means_ci95", "Mean MASE relative to seasonal naive")
+    geo = ("relative_mase_geomean", "relative_mase_ci95", "MASE relative to seasonal naive (geometric mean)")
     panels = [
-        ("Retail: 300 products, 5 cut-offs, 8 weeks ahead", summary.table("retail")),
-        ("GB demand 2025: 28 days, day ahead", summary.merged("grid_historic", "grid_historic_temp")),
-        ("GB demand after 15 Oct 2026 (leak-free): 5 days", summary.merged("grid_leakfree", "grid_leakfree_temp")),
+        ("Retail: 300 products, 5 cut-offs, 8 weeks ahead", summary.table("retail"), mean),
+        ("GB demand 2025: 28 days, day ahead", summary.merged("grid_historic", "grid_historic_temp"), geo),
+        ("GB demand after 15 Oct 2026 (leak-free): 5 days", summary.merged("grid_leakfree", "grid_leakfree_temp"), geo),
     ]
-    metrics = [("relative_mase_geomean", "MASE relative to seasonal naive"),
-               ("relative_wql_pooled", "WQL relative to seasonal naive")]
-    heights = [max(len(t), 1) for _, t in panels]
+    heights = [max(len(t), 1) for _, t, _ in panels]
     fig, axes = plt.subplots(len(panels), 2, figsize=(11, 0.28 * sum(heights) + 2.5),
                              gridspec_kw={"height_ratios": heights}, squeeze=False)
-    for r, (title, table) in enumerate(panels):
+    for r, (title, table, (key, ci_key, mase_label)) in enumerate(panels):
+        metrics = [(key, mase_label), ("relative_wql_pooled", "WQL relative to seasonal naive (pooled)")]
         for c, (metric, xlabel) in enumerate(metrics):
             ax = axes[r][c]
             style(ax)
             if table.empty:
                 ax.set_visible(False)
                 continue
-            t = table.sort_values("relative_mase_geomean", ascending=False)
+            t = table.sort_values(key, ascending=False)
             y = np.arange(len(t))
             values = t[metric].to_numpy(dtype=float)
             ax.barh(y, values, height=0.7, color=[COLOURS[family(m)] for m in t["model"]], edgecolor="white", linewidth=1)
-            if metric == "relative_mase_geomean":
-                lo = np.array([ci[0] for ci in t["relative_mase_ci95"]], dtype=float)
-                hi = np.array([ci[1] for ci in t["relative_mase_ci95"]], dtype=float)
+            if metric == key:
+                lo = np.array([ci[0] for ci in t[ci_key]], dtype=float)
+                hi = np.array([ci[1] for ci in t[ci_key]], dtype=float)
                 ok = np.isfinite(lo) & np.isfinite(hi)
                 ax.errorbar(values[ok], y[ok], xerr=[values[ok] - lo[ok], hi[ok] - values[ok]], fmt="none",
                             ecolor=INK, elinewidth=0.8, capsize=2)
             ends = values.copy()
-            if metric == "relative_mase_geomean":
+            if metric == key:
                 ends = np.where(np.isfinite(hi), np.maximum(values, hi), values)
             for yi, v, e in zip(y, values, ends):
                 if np.isfinite(v):
@@ -146,14 +147,14 @@ def bars(summary: Summary, out: Path) -> None:
     handles = [plt.Rectangle((0, 0), 1, 1, color=COLOURS[k]) for k in ("baseline", "fitted", "pretrained")]
     fig.legend(handles, ["Baseline", "Fitted per cut-off", "Pretrained (zero-shot)"], loc="lower center", ncol=3,
                frameon=False, fontsize=8, bbox_to_anchor=(0.5, 0.025))
-    fig.text(0.01, 0.002, "Lower is better. MASE: geometric mean over windows of the ratio to seasonal naive, with "
-             "95% series-bootstrap intervals. WQL: pooled. Temperature is the day's measured GB average (an oracle).",
+    fig.text(0.01, 0.002, "Lower is better. Retail MASE: ratio of mean MASE to seasonal naive's; grid MASE: geometric mean of "
+             "per-window ratios; both with 95% bootstrap intervals. WQL: pooled. Temperature is the day's measured GB average (an oracle).",
              fontsize=7, color=MUTED)
     fig.tight_layout(rect=(0, 0.06, 1, 1))
     save(fig, out / "results_bars")
 
 
-def sweep_curves(summary: Summary, prefix: str, lengths: list[int]) -> dict:
+def sweep_curves(summary: Summary, prefix: str, lengths: list[int], key: str) -> dict:
     curves = {"relmase": {}, "relwql": {}, "mase": {}, "n_windows": None, "n_series": None}
     for n in lengths:
         t = summary.table(f"{prefix}{n:02d}" if prefix.startswith("retail") else f"{prefix}{n:04d}")
@@ -162,17 +163,16 @@ def sweep_curves(summary: Summary, prefix: str, lengths: list[int]) -> dict:
         curves["n_windows"] = int(t["windows"].max())
         curves["n_series"] = int(t["series"].max())
         for _, row in t.iterrows():
-            curves["relmase"].setdefault(row["model"], {})[n] = row["relative_mase_geomean"]
+            curves["relmase"].setdefault(row["model"], {})[n] = row[key]
             curves["relwql"].setdefault(row["model"], {})[n] = row["relative_wql_pooled"]
             curves["mase"].setdefault(row["model"], {})[n] = row["mase_mean"]
     return curves
 
 
 def sweep_chart(curves: dict, lengths: list[int], unit: str, title: str, path: Path, ticks: list[str],
-                footnote: str) -> None:
+                footnote: str, mase_label: str) -> None:
     fig, axes = plt.subplots(1, 2, figsize=(11, 4.2))
-    for ax, key, ylabel in zip(axes, ["relmase", "relwql"],
-                               ["MASE relative to seasonal naive (full history)", "WQL relative to seasonal naive"]):
+    for ax, key, ylabel in zip(axes, ["relmase", "relwql"], [mase_label, "WQL relative to seasonal naive"]):
         style(ax)
         ax.grid(axis="y", color=GRID, linewidth=0.8)
         for model in SWEEP_MODELS:
@@ -310,6 +310,7 @@ def demo(forecasts: Path, summary: Summary, products: pd.DataFrame, picks: list[
         "models": [{"id": mid, "label": label(mid)} for mid in model_ids],
         "series": series,
         "sweep": {
+            "measure": "ratio of mean MASE to seasonal naive with full history",
             "lengths_weeks": lengths,
             "n_series": sweep["n_series"],
             "n_windows": sweep["n_windows"],
@@ -499,15 +500,17 @@ def extend_demo(path: Path, summary: Summary, forecasts: Path, grid_lengths: lis
 
     first = lambda curves: next(iter(next(iter(curves.values())).values()))  # noqa: E731
     payload["sweep_grid"] = {
+        "measure": "geometric mean over windows of MASE relative to seasonal naive (same half-hour last week) with 7 days",
         "lengths_halfhours": grid_lengths, "n_windows": int(first(grid)["windows"]),
         "relmase": block(grid, grid_lengths, "relative_mase_geomean"),
         "relwql": block(grid, grid_lengths, "relative_wql_pooled"),
         "note": "baseline = seasonal naive (same half-hour last week) with 7 days; null = cannot fit",
     }
     payload["sweep_retail_floor"] = {
+        "measure": "ratio of mean MASE to seasonal naive with full history",
         "lengths_weeks": retail_lengths, "n_series": int(first(retail)["series"]),
         "n_windows": int(first(retail)["windows"]),
-        "relmase": block(retail, retail_lengths, "relative_mase_geomean"),
+        "relmase": block(retail, retail_lengths, "relative_mase_of_means"),
         "relwql": block(retail, retail_lengths, "relative_wql_pooled"),
         "note": "same products, targets and baseline as sweep; null = cannot fit",
     }
