@@ -1,0 +1,17 @@
+{
+  "eligible_pairs": 14535,
+  "eligible_products": 3295,
+  "sampled_products": 300,
+  "seed": 2026,
+  "windows": 1332,
+  "windows_by_history_weeks": {
+    "(0, 13]": 52,
+    "(13, 26]": 81,
+    "(26, 52]": 115,
+    "(52, 78]": 185,
+    "(78, 200]": 899
+  },
+  "sweep_products_eligible": 217,
+  "sweep_products": 80,
+  "sweep_windows": 342
+}

@@ -73,6 +73,14 @@ def retail_tasks(prepared: Path, sample: int, sweep_sample: int):
     retail = backtest.windows("retail", main, calendar=True)
     sweep_base = backtest.windows("retail_sweep", sweep_pairs, calendar=False)
     sweep = [sweep_base.truncated(f"retail_sweep_L{n:02d}", n) for n in RETAIL_SWEEP]
+    notes = {
+        "eligible_pairs": int(len(pairs)), "eligible_products": int(len(codes)), "sampled_products": sample,
+        "seed": SEED, "windows": int(len(main)),
+        "windows_by_history_weeks": {str(k): int(v) for k, v in pd.cut(main["history"], [0, 13, 26, 52, 78, 200]).value_counts().sort_index().items()},
+        "sweep_products_eligible": int(len(long_products)), "sweep_products": int(len(sweep_codes)),
+        "sweep_windows": int(len(sweep_pairs)),
+    }
+    (prepared / "retail_sample_notes.json").write_text(json.dumps(notes, indent=2))
     return retail, sweep
 
 

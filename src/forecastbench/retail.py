@@ -28,6 +28,25 @@ class Invoices:
         return pd.read_parquet(self._cache)
 
 
+def cancelled_originals(lines: pd.DataFrame, cancelled: pd.Series) -> list[int]:
+    """Index of each positive line that a later cancellation reverses exactly (same customer, code, quantity)."""
+    keyed = lines.dropna(subset=["Customer ID"])
+    positives = keyed[~cancelled.loc[keyed.index] & (keyed["Quantity"] > 0)]
+    pool = {}
+    for idx, row in positives.sort_values("InvoiceDate").iterrows():
+        pool.setdefault((row["Customer ID"], row["StockCode"], row["Quantity"]), []).append((row["InvoiceDate"], idx))
+    taken = []
+    reversals = keyed[cancelled.loc[keyed.index] & (keyed["Quantity"] < 0)].sort_values("InvoiceDate")
+    for _, row in reversals.iterrows():
+        candidates = pool.get((row["Customer ID"], row["StockCode"], -row["Quantity"]), [])
+        earlier = [c for c in candidates if c[0] <= row["InvoiceDate"]]
+        if earlier:
+            choice = earlier[-1]
+            candidates.remove(choice)
+            taken.append(choice[1])
+    return taken
+
+
 class WeeklySales:
     """Weekly units per StockCode (all countries), weeks ending Sunday, partial weeks dropped."""
 
@@ -42,7 +61,15 @@ class WeeklySales:
         d["StockCode"] = d["StockCode"].astype(str).str.strip().str.upper()
         cancelled = d["Invoice"].str.startswith("C")
         notes["dropped_cancellations"] = int(cancelled.sum())
-        d = d[~cancelled]
+        matched = cancelled_originals(d, cancelled)
+        notes["dropped_original_lines_matched_to_a_cancellation"] = int(len(matched))
+        notes["dropped_original_units_matched_to_a_cancellation"] = int(d.loc[matched, "Quantity"].sum())
+        notes["cancellation_matching"] = (
+            "an original line is dropped when a later cancellation has the same customer, StockCode and "
+            "quantity (the latest earlier match); this removes cancelled bulk orders such as 74,215 units "
+            "of 23166 on 18 Jan 2011"
+        )
+        d = d[~cancelled & ~d.index.isin(matched)]
         bad = (d["Quantity"] <= 0) | (d["Price"] <= 0)
         notes["dropped_nonpositive_quantity_or_price"] = int(bad.sum())
         d = d[~bad]

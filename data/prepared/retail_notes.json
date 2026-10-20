@@ -1,8 +1,11 @@
 {
   "raw_lines": 1067371,
   "dropped_cancellations": 19494,
-  "dropped_nonpositive_quantity_or_price": 6207,
-  "dropped_non_product_lines": 4793,
+  "dropped_original_lines_matched_to_a_cancellation": 6485,
+  "dropped_original_units_matched_to_a_cancellation": 407924,
+  "cancellation_matching": "an original line is dropped when a later cancellation has the same customer, StockCode and quantity (the latest earlier match); this removes cancelled bulk orders such as 74,215 units of 23166 on 18 Jan 2011",
+  "dropped_nonpositive_quantity_or_price": 6206,
+  "dropped_non_product_lines": 4619,
   "dropped_non_product_codes": [
     "ADJUST",
     "ADJUST2",
@@ -48,6 +51,6 @@
   "first_full_week_ending": "2009-12-13",
   "last_full_week_ending": "2011-12-04",
   "weeks": 104,
-  "products": 4675,
+  "products": 4668,
   "description": "Series start at each product's first week with a sale and are zero-filled to the last full week."
 }

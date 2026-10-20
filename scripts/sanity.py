@@ -20,6 +20,7 @@ from statsforecast.models import AutoETS  # noqa: E402
 from timestral import TimestralForecaster  # noqa: E402
 
 from forecastbench.scoring import Task  # noqa: E402
+from forecastbench.windows import christmas_covariates  # noqa: E402
 
 CHECK_WINDOWS = [0, 100, 500, 1000, 1300]
 
@@ -78,6 +79,21 @@ def main() -> None:
         expected = s["y"].to_numpy()[n - 52:n - 44] if n >= 52 else np.repeat(s["y"].to_numpy()[n - 1], 8)
         rows.append({"window": i, "matches": bool(np.allclose(expected, snaive[i, :, 4]))})
     out["seasonal_naive_retail"] = rows
+    # Timestral with a known-future indicator that never fires in the context (product 23155,
+    # 29 weeks of history at the 9 Oct 2011 cut-off; the Nov-Dec flag turns on in week 4 of 8).
+    s = weekly[weekly["unique_id"] == "23155"]
+    ds = pd.DatetimeIndex(s["ds"])
+    y = s["y"].to_numpy(dtype=float)
+    n = int((ds <= pd.Timestamp("2011-10-09")).sum())
+    k = christmas_covariates(ds[: n + 8])
+    rows = {}
+    for name, rows_k in [("none", None), ("peak_flag_and_week", k[None]), ("peak_flag_only", k[None, :1]),
+                         ("week_of_year_only", k[None, 1:])]:
+        f = model.forecast(y[:n], prediction_length=8, known_covariates=rows_k)
+        rows[name] = {"median": np.round(f.quantile(0.5)[0, 0].numpy()).tolist(),
+                      "p90": np.round(f.quantile(0.9)[0, 0].numpy()).tolist()}
+    out["timestral_unseen_indicator_23155"] = {"context_weeks": n, "actual": y[n:n + 8].tolist(), **rows}
+
     longest = meta.sort_values("context_length", ascending=False).head(20)
     components = []
     for i in longest.index:
