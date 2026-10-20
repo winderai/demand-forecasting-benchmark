@@ -4379,10 +4379,10 @@
       ],
       "failures": {
         "ets-aaa": {
-          "error": "forecast: ValueError('cannot fit: 12 observations, this model needs at least 96')\nTraceback (most recent call last):\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/contenders.py\", line 121, in forecast\n    raise ValueError(f\"cannot fit: {shortest} observations, this model needs at least {self._min_length}\")\nValueError: cannot fit: 12 observations, this model needs at least 96\n"
+          "error": "forecast: ValueError('cannot fit: 12 observations, this model needs at least 96')\nTraceback (most recent call last):\n  File \"src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"src/forecastbench/contenders.py\", line 121, in forecast\n    raise ValueError(f\"cannot fit: {shortest} observations, this model needs at least {self._min_length}\")\nValueError: cannot fit: 12 observations, this model needs at least 96\n"
         },
         "lightgbm-context-only": {
-          "error": "forecast: ValueError('cannot fit: 12 rows; LightGBM with min_child_samples=20 needs at least 40 to make one split')\nTraceback (most recent call last):\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/contenders.py\", line 246, in forecast\n    raise ValueError(f\"cannot fit: {len(train)} rows; LightGBM with min_child_samples=20 needs at \"\nValueError: cannot fit: 12 rows; LightGBM with min_child_samples=20 needs at least 40 to make one split\n"
+          "error": "forecast: ValueError('cannot fit: 12 rows; LightGBM with min_child_samples=20 needs at least 40 to make one split')\nTraceback (most recent call last):\n  File \"src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"src/forecastbench/contenders.py\", line 246, in forecast\n    raise ValueError(f\"cannot fit: {len(train)} rows; LightGBM with min_child_samples=20 needs at \"\nValueError: cannot fit: 12 rows; LightGBM with min_child_samples=20 needs at least 40 to make one split\n"
         }
       }
     },
@@ -4688,7 +4688,7 @@
       ],
       "failures": {
         "lightgbm-context-only": {
-          "error": "forecast: ValueError('cannot fit: 12 rows; LightGBM with min_child_samples=20 needs at least 40 to make one split')\nTraceback (most recent call last):\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/contenders.py\", line 246, in forecast\n    raise ValueError(f\"cannot fit: {len(train)} rows; LightGBM with min_child_samples=20 needs at \"\nValueError: cannot fit: 12 rows; LightGBM with min_child_samples=20 needs at least 40 to make one split\n"
+          "error": "forecast: ValueError('cannot fit: 12 rows; LightGBM with min_child_samples=20 needs at least 40 to make one split')\nTraceback (most recent call last):\n  File \"src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"src/forecastbench/contenders.py\", line 246, in forecast\n    raise ValueError(f\"cannot fit: {len(train)} rows; LightGBM with min_child_samples=20 needs at \"\nValueError: cannot fit: 12 rows; LightGBM with min_child_samples=20 needs at least 40 to make one split\n"
         }
       }
     },
@@ -4994,10 +4994,10 @@
       ],
       "failures": {
         "ets-aaa": {
-          "error": "forecast: ValueError('cannot fit: 24 observations, this model needs at least 96')\nTraceback (most recent call last):\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/contenders.py\", line 121, in forecast\n    raise ValueError(f\"cannot fit: {shortest} observations, this model needs at least {self._min_length}\")\nValueError: cannot fit: 24 observations, this model needs at least 96\n"
+          "error": "forecast: ValueError('cannot fit: 24 observations, this model needs at least 96')\nTraceback (most recent call last):\n  File \"src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"src/forecastbench/contenders.py\", line 121, in forecast\n    raise ValueError(f\"cannot fit: {shortest} observations, this model needs at least {self._min_length}\")\nValueError: cannot fit: 24 observations, this model needs at least 96\n"
         },
         "lightgbm-context-only": {
-          "error": "forecast: ValueError('cannot fit: 24 rows; LightGBM with min_child_samples=20 needs at least 40 to make one split')\nTraceback (most recent call last):\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/contenders.py\", line 246, in forecast\n    raise ValueError(f\"cannot fit: {len(train)} rows; LightGBM with min_child_samples=20 needs at \"\nValueError: cannot fit: 24 rows; LightGBM with min_child_samples=20 needs at least 40 to make one split\n"
+          "error": "forecast: ValueError('cannot fit: 24 rows; LightGBM with min_child_samples=20 needs at least 40 to make one split')\nTraceback (most recent call last):\n  File \"src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"src/forecastbench/contenders.py\", line 246, in forecast\n    raise ValueError(f\"cannot fit: {len(train)} rows; LightGBM with min_child_samples=20 needs at \"\nValueError: cannot fit: 24 rows; LightGBM with min_child_samples=20 needs at least 40 to make one split\n"
         }
       }
     },
@@ -5303,7 +5303,7 @@
       ],
       "failures": {
         "lightgbm-context-only": {
-          "error": "forecast: ValueError('cannot fit: 24 rows; LightGBM with min_child_samples=20 needs at least 40 to make one split')\nTraceback (most recent call last):\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/contenders.py\", line 246, in forecast\n    raise ValueError(f\"cannot fit: {len(train)} rows; LightGBM with min_child_samples=20 needs at \"\nValueError: cannot fit: 24 rows; LightGBM with min_child_samples=20 needs at least 40 to make one split\n"
+          "error": "forecast: ValueError('cannot fit: 24 rows; LightGBM with min_child_samples=20 needs at least 40 to make one split')\nTraceback (most recent call last):\n  File \"src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"src/forecastbench/contenders.py\", line 246, in forecast\n    raise ValueError(f\"cannot fit: {len(train)} rows; LightGBM with min_child_samples=20 needs at \"\nValueError: cannot fit: 24 rows; LightGBM with min_child_samples=20 needs at least 40 to make one split\n"
         }
       }
     },
@@ -5646,7 +5646,7 @@
       ],
       "failures": {
         "ets-aaa": {
-          "error": "forecast: ValueError('cannot fit: 48 observations, this model needs at least 96')\nTraceback (most recent call last):\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/contenders.py\", line 121, in forecast\n    raise ValueError(f\"cannot fit: {shortest} observations, this model needs at least {self._min_length}\")\nValueError: cannot fit: 48 observations, this model needs at least 96\n"
+          "error": "forecast: ValueError('cannot fit: 48 observations, this model needs at least 96')\nTraceback (most recent call last):\n  File \"src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"src/forecastbench/contenders.py\", line 121, in forecast\n    raise ValueError(f\"cannot fit: {shortest} observations, this model needs at least {self._min_length}\")\nValueError: cannot fit: 48 observations, this model needs at least 96\n"
         }
       }
     },
@@ -11343,7 +11343,7 @@
       ],
       "failures": {
         "autoets": {
-          "error": "forecast: ValueError('cannot fit: 1 observations, this model needs at least 7')\nTraceback (most recent call last):\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/contenders.py\", line 121, in forecast\n    raise ValueError(f\"cannot fit: {shortest} observations, this model needs at least {self._min_length}\")\nValueError: cannot fit: 1 observations, this model needs at least 7\n"
+          "error": "forecast: ValueError('cannot fit: 1 observations, this model needs at least 7')\nTraceback (most recent call last):\n  File \"src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"src/forecastbench/contenders.py\", line 121, in forecast\n    raise ValueError(f\"cannot fit: {shortest} observations, this model needs at least {self._min_length}\")\nValueError: cannot fit: 1 observations, this model needs at least 7\n"
         }
       }
     },
@@ -11686,7 +11686,7 @@
       ],
       "failures": {
         "autoets": {
-          "error": "forecast: ValueError('cannot fit: 2 observations, this model needs at least 7')\nTraceback (most recent call last):\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/contenders.py\", line 121, in forecast\n    raise ValueError(f\"cannot fit: {shortest} observations, this model needs at least {self._min_length}\")\nValueError: cannot fit: 2 observations, this model needs at least 7\n"
+          "error": "forecast: ValueError('cannot fit: 2 observations, this model needs at least 7')\nTraceback (most recent call last):\n  File \"src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"src/forecastbench/contenders.py\", line 121, in forecast\n    raise ValueError(f\"cannot fit: {shortest} observations, this model needs at least {self._min_length}\")\nValueError: cannot fit: 2 observations, this model needs at least 7\n"
         }
       }
     },
@@ -12029,7 +12029,7 @@
       ],
       "failures": {
         "autoets": {
-          "error": "forecast: ValueError('cannot fit: 4 observations, this model needs at least 7')\nTraceback (most recent call last):\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/contenders.py\", line 121, in forecast\n    raise ValueError(f\"cannot fit: {shortest} observations, this model needs at least {self._min_length}\")\nValueError: cannot fit: 4 observations, this model needs at least 7\n"
+          "error": "forecast: ValueError('cannot fit: 4 observations, this model needs at least 7')\nTraceback (most recent call last):\n  File \"src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"src/forecastbench/contenders.py\", line 121, in forecast\n    raise ValueError(f\"cannot fit: {shortest} observations, this model needs at least {self._min_length}\")\nValueError: cannot fit: 4 observations, this model needs at least 7\n"
         }
       }
     },
@@ -12786,7 +12786,7 @@
       ],
       "failures": {
         "autoets": {
-          "error": "forecast: ValueError('cannot fit: 1 observations, this model needs at least 7')\nTraceback (most recent call last):\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/contenders.py\", line 121, in forecast\n    raise ValueError(f\"cannot fit: {shortest} observations, this model needs at least {self._min_length}\")\nValueError: cannot fit: 1 observations, this model needs at least 7\n"
+          "error": "forecast: ValueError('cannot fit: 1 observations, this model needs at least 7')\nTraceback (most recent call last):\n  File \"src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"src/forecastbench/contenders.py\", line 121, in forecast\n    raise ValueError(f\"cannot fit: {shortest} observations, this model needs at least {self._min_length}\")\nValueError: cannot fit: 1 observations, this model needs at least 7\n"
         }
       }
     },
@@ -13129,7 +13129,7 @@
       ],
       "failures": {
         "autoets": {
-          "error": "forecast: ValueError('cannot fit: 2 observations, this model needs at least 7')\nTraceback (most recent call last):\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/contenders.py\", line 121, in forecast\n    raise ValueError(f\"cannot fit: {shortest} observations, this model needs at least {self._min_length}\")\nValueError: cannot fit: 2 observations, this model needs at least 7\n"
+          "error": "forecast: ValueError('cannot fit: 2 observations, this model needs at least 7')\nTraceback (most recent call last):\n  File \"src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"src/forecastbench/contenders.py\", line 121, in forecast\n    raise ValueError(f\"cannot fit: {shortest} observations, this model needs at least {self._min_length}\")\nValueError: cannot fit: 2 observations, this model needs at least 7\n"
         }
       }
     },
@@ -13472,7 +13472,7 @@
       ],
       "failures": {
         "autoets": {
-          "error": "forecast: ValueError('cannot fit: 4 observations, this model needs at least 7')\nTraceback (most recent call last):\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/phil/code/winderai/demand-forecasting-benchmark/src/forecastbench/contenders.py\", line 121, in forecast\n    raise ValueError(f\"cannot fit: {shortest} observations, this model needs at least {self._min_length}\")\nValueError: cannot fit: 4 observations, this model needs at least 7\n"
+          "error": "forecast: ValueError('cannot fit: 4 observations, this model needs at least 7')\nTraceback (most recent call last):\n  File \"src/forecastbench/backtest.py\", line 82, in execute\n    q = contender.forecast(windows)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"src/forecastbench/contenders.py\", line 121, in forecast\n    raise ValueError(f\"cannot fit: {shortest} observations, this model needs at least {self._min_length}\")\nValueError: cannot fit: 4 observations, this model needs at least 7\n"
         }
       }
     },
