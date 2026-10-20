@@ -13,7 +13,8 @@ its tables comes out of `results/summary.json`.
 - **Pretrained (zero-shot):** Timestral 5M and 209M (Mistral AI), Chronos-2 (Amazon),
   TimesFM 2.5 and TimesFM 3 (Google), t0-gamma and t0-beta (The Forecasting Company).
 - **Fitted at every cut-off:** seasonal naive, AutoETS (a stand-in for Excel's
-  `FORECAST.ETS`), Croston and TSB for intermittent demand, and LightGBM.
+  `FORECAST.ETS`; on the grid also ETS(A,A,A), Excel's model structure), Croston and TSB for
+  intermittent demand, and LightGBM.
 - **Measured:** MASE and weighted quantile loss (the GIFT-Eval conventions), each relative
   to seasonal naive; 10-90% band coverage; units short and left over if you order at the
   90th percentile; CPU time per series.
@@ -44,17 +45,20 @@ ratios to seasonal naive on the same windows (below 1 beats it). Every figure is
   this data. On GB demand the sweep finds none either: with 1,344 or 4,032 half-hours LightGBM
   fitted on the context alone (0.510, 0.479) trails the best pretrained model (0.377, 0.360),
   though it beats Timestral 5M at 1,344. With a single day of history it beats Timestral 209M,
-  Timestral 5M and t0-gamma, and only TimesFM 2.5 beats seasonal naive (0.933). Note what limits the test: the data spans two years, so
-  "long history" here tops out at 78 weeks.
+  Timestral 5M and t0-gamma, and only TimesFM 2.5 beats a seasonal naive that has twelve
+  weeks (0.933). What limits the retail test: the data spans two years, so "long history"
+  tops out at 78 weeks.
 - **GB demand, 2025.** Most pretrained models also beat LightGBM fitted on a year of history
   with calendar features (0.492; 0.445 with temperature); TimesFM 2.5 (0.483) and Timestral
   5M with temperature (0.446) do not. AutoETS's automatic model selection picks a non-seasonal model on
   85 days of half-hourly demand and loses badly to seasonal naive (2.57); forcing Excel's
-  ETS(A,A,A) structure fixes most of that (0.62), still behind everything else.
+  ETS(A,A,A) structure fixes most of that (0.62), still behind every pretrained model and
+  LightGBM.
 - **GB demand after 15 Oct 2026 (leak-free).** Five days. Every pretrained model's and
   LightGBM's interval spans 1, so none is separated from seasonal naive, or from the others,
   with confidence; AutoETS is the one model reliably worse (2.28, 1.48-3.52). The order is not the
-  2025 order: Chronos-2 and LightGBM do relatively better, TimesFM 2.5 and Timestral 5M worse.
+  2025 order: Chronos-2 with temperature ranks first (0.765) and LightGBM with temperature
+  fifth (0.804); TimesFM 2.5 and Timestral 5M are barely ahead of seasonal naive.
 - **Temperature** (an oracle daily average) helped Timestral 209M, TimesFM 3 and LightGBM a
   little in 2025 (0.357 to 0.353, 0.393 to 0.382, 0.492 to 0.445) and made Chronos-2, t0-gamma
   and Timestral 5M worse (0.373 to 0.411, 0.370 to 0.401, 0.421 to 0.446). In the five
@@ -191,6 +195,11 @@ Relative MASE (geometric mean) / relative WQL (pooled) / mean MASE; seasonal nai
 
 ![One product's forecasts](charts/example_forecast.svg)
 
+The example product is chosen by rule (the highest-volume product with all five cut-offs), not
+picked for the result; on it LightGBM's band fits best. `results/demo.json` holds twelve
+rule-picked products (`charts/demo_picks.json`) and both grid windows for the article's
+interactive chart.
+
 ### Calibration and ordering at the 90th percentile (retail)
 
 Over all 1,332 retail windows, customers bought 362,575 units. Ordering each week at a model's
@@ -236,7 +245,30 @@ in 2025 and 0.59-0.77 in the five leak-free days.
 
 Times are wall-clock on a machine other jobs were using: the 1-minute load average during the
 runs ranged from about 11 to 218 on 8 cores (`loadavg_1min_before` in `results/summary.json`).
-Treat them as indicative and as ratios, not absolutes. <!-- TIMING -->
+Treat them as indicative and as ratios, not absolutes.
+
+The quieter pass below (`scripts/timing.py`, `results/timing_*.json`) ran after the backtest
+with the 1-minute load average between 1.6 and 3.2: 256 retail windows and the 5 leak-free
+grid windows (4,096 steps of context), no covariates, median of three repeats. These are the
+better numbers to quote; still indicative.
+
+| Model | Retail, ms per series | Grid, s per day-ahead forecast | Load, s |
+|---|---|---|---|
+| Timestral 5M | 0.5 | 0.01 | 0.1 |
+| Timestral 209M | 6.1 | 0.16 | 1.8 |
+| Chronos-2 | 2.2 | 0.08 | 0.1 |
+| TimesFM 2.5 | 6.8 | 0.29 | 4.8 |
+| TimesFM 3 (non-commercial weights) | 11.2 | 0.29 | 5.2 |
+| t0-gamma | 5.5 | 0.24 | 2.8 |
+| AutoETS (spreadsheet stand-in) | 21.4 | 2.71 | 0.0 |
+| LightGBM (global, fitted) | 84.1 | 2.77 | 0.0 |
+
+AutoETS and LightGBM times include fitting; LightGBM retail fits 72 models (9 quantiles x 8
+horizons) on the 256 series' histories. The pretrained models' load time is reading the
+weights from the local cache.
+
+The backtest's own timings, under heavy load:
+
 
 | Model | Retail, s per window (1,332) | Grid, s per window (28, 4,096 steps) | Load (s) |
 |---|---|---|---|
@@ -276,6 +308,8 @@ uv run python scripts/score.py                     # -> results/summary.json, re
 uv run python scripts/tables.py                    # -> results/tables.md (the tables below)
 uv run python scripts/charts.py                    # -> charts/*.svg|png, results/demo.json
 uv run python scripts/sanity.py                    # -> results/sanity.json
+uv run python scripts/timing.py --family neural    # optional quiet-machine timing pass
+uv run python scripts/timing.py --family classical
 uv run pytest                                      # metric functions against hand-computed values
 ```
 

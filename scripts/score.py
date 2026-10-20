@@ -118,6 +118,8 @@ def main() -> None:
             "retail_clip": "every retail quantile clipped at zero, for every contender",
         },
         "tasks": tables,
+        "timing_pass": {f.stem: json.loads(f.read_text()) for f in sorted(args.out.glob("timing_*.json"))},
+        "sanity": json.loads((args.out / "sanity.json").read_text()) if (args.out / "sanity.json").exists() else None,
     }
     (args.out / "summary.json").write_text(json.dumps(summary, indent=2, default=str))
     print(f"scored {len(tasks)} tasks, {len(per_window)} window-model rows")

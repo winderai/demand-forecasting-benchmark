@@ -1,5 +1,5 @@
 {
-  "run_date_utc": "2026-10-20T13:45:26+00:00",
+  "run_date_utc": "2026-10-20T14:07:57+00:00",
   "environment": {
     "machine": "arm64 Apple M1, 8 cores, 16 GB",
     "os": "macOS-26.5.1-arm64-arm-64bit",
@@ -48,7 +48,7 @@
         "revision": "941e522547ec63f0f2aad57089fa0f5b8498bdf8"
       }
     },
-    "benchmark_git_commit": "1187c18d4db7a763e1ff6c22d683d50283e6fe1c"
+    "benchmark_git_commit": "6b23080335e6a6575b62e13203708923223e2b4c"
   },
   "data": [
     {
@@ -4287,6 +4287,1231 @@
         }
       ],
       "failures": {}
+    }
+  },
+  "timing_pass": {
+    "timing_classical": {
+      "run_utc": "2026-10-20T14:07:37+00:00",
+      "machine": "arm64, 8 cores",
+      "torch_threads": null,
+      "statsforecast_jobs": 1,
+      "lightgbm_threads": 1,
+      "note": "AutoETS on the grid fits one series per window with n_jobs=1 here (the backtest used 8 processes).",
+      "rows": [
+        {
+          "model": "autoets",
+          "task": "timing_retail",
+          "windows": 256,
+          "load_s": 0.0,
+          "median_s": 5.485572333000164,
+          "median_s_per_window": 0.02142801692578189,
+          "repeats_s": [
+            5.455834958000196,
+            5.617989917000159,
+            5.485572333000164
+          ],
+          "loadavg_1min_before": 1.55126953125,
+          "loadavg_1min_after": 1.84423828125
+        },
+        {
+          "model": "autoets",
+          "task": "timing_grid",
+          "windows": 5,
+          "load_s": 0.0,
+          "median_s": 13.527360125000996,
+          "median_s_per_window": 2.705472025000199,
+          "repeats_s": [
+            13.54263091699977,
+            13.447817750000468,
+            13.527360125000996
+          ],
+          "loadavg_1min_before": 1.84423828125,
+          "loadavg_1min_after": 2.181640625
+        },
+        {
+          "model": "lightgbm",
+          "task": "timing_retail",
+          "windows": 256,
+          "load_s": 0.0,
+          "median_s": 21.532914166999035,
+          "median_s_per_window": 0.08411294596483998,
+          "repeats_s": [
+            21.811387916999593,
+            21.532914166999035,
+            21.52753975000087
+          ],
+          "loadavg_1min_before": 2.181640625,
+          "loadavg_1min_after": 1.92041015625
+        },
+        {
+          "model": "lightgbm",
+          "task": "timing_grid",
+          "windows": 5,
+          "load_s": 0.0,
+          "median_s": 13.864598000000115,
+          "median_s_per_window": 2.772919600000023,
+          "repeats_s": [
+            13.864598000000115,
+            13.872329124998942,
+            13.847796834001201
+          ],
+          "loadavg_1min_before": 1.92041015625,
+          "loadavg_1min_after": 1.8779296875
+        }
+      ]
+    },
+    "timing_neural": {
+      "run_utc": "2026-10-20T14:02:49+00:00",
+      "machine": "arm64, 8 cores",
+      "torch_threads": 8,
+      "statsforecast_jobs": 1,
+      "lightgbm_threads": 1,
+      "note": "AutoETS on the grid fits one series per window with n_jobs=1 here (the backtest used 8 processes).",
+      "rows": [
+        {
+          "model": "timestral-5m",
+          "task": "timing_retail",
+          "windows": 256,
+          "load_s": 0.11400875000072119,
+          "median_s": 0.13772900000003574,
+          "median_s_per_window": 0.0005380039062501396,
+          "repeats_s": [
+            0.15493812500062631,
+            0.1344898329989519,
+            0.13772900000003574
+          ],
+          "loadavg_1min_before": 3.08935546875,
+          "loadavg_1min_after": 3.08935546875
+        },
+        {
+          "model": "timestral-5m",
+          "task": "timing_grid",
+          "windows": 5,
+          "load_s": 0.02191533299992443,
+          "median_s": 0.053558499999780906,
+          "median_s_per_window": 0.010711699999956182,
+          "repeats_s": [
+            0.0558953340005246,
+            0.05294629100171733,
+            0.053558499999780906
+          ],
+          "loadavg_1min_before": 3.08935546875,
+          "loadavg_1min_after": 3.08935546875
+        },
+        {
+          "model": "timestral-209m",
+          "task": "timing_retail",
+          "windows": 256,
+          "load_s": 1.750063916999352,
+          "median_s": 1.5677142919994367,
+          "median_s_per_window": 0.0061238839531227995,
+          "repeats_s": [
+            1.6020054160017025,
+            1.5677142919994367,
+            1.5514888750003593
+          ],
+          "loadavg_1min_before": 3.162109375,
+          "loadavg_1min_after": 3.162109375
+        },
+        {
+          "model": "timestral-209m",
+          "task": "timing_grid",
+          "windows": 5,
+          "load_s": 0.7037992499990651,
+          "median_s": 0.8040515419997973,
+          "median_s_per_window": 0.16081030839995947,
+          "repeats_s": [
+            0.8075475419991562,
+            0.8040515419997973,
+            0.793886208000913
+          ],
+          "loadavg_1min_before": 3.06884765625,
+          "loadavg_1min_after": 3.06884765625
+        },
+        {
+          "model": "chronos-2",
+          "task": "timing_retail",
+          "windows": 256,
+          "load_s": 0.11571720800020557,
+          "median_s": 0.5508195839993277,
+          "median_s_per_window": 0.002151638999997374,
+          "repeats_s": [
+            1.693984375000582,
+            0.5508195839993277,
+            0.5501435840014892
+          ],
+          "loadavg_1min_before": 2.90283203125,
+          "loadavg_1min_after": 2.90283203125
+        },
+        {
+          "model": "chronos-2",
+          "task": "timing_grid",
+          "windows": 5,
+          "load_s": 0.02910979200169095,
+          "median_s": 0.4087198340002942,
+          "median_s_per_window": 0.08174396680005884,
+          "repeats_s": [
+            0.42562520899991796,
+            0.4087198340002942,
+            0.3974893329996121
+          ],
+          "loadavg_1min_before": 2.90283203125,
+          "loadavg_1min_after": 2.75
+        },
+        {
+          "model": "timesfm-2.5",
+          "task": "timing_retail",
+          "windows": 256,
+          "load_s": 4.81081762499889,
+          "median_s": 1.7412850830005482,
+          "median_s_per_window": 0.006801894855470891,
+          "repeats_s": [
+            1.9016749170004914,
+            1.7412850830005482,
+            1.725217999999586
+          ],
+          "loadavg_1min_before": 2.60986328125,
+          "loadavg_1min_after": 2.48046875
+        },
+        {
+          "model": "timesfm-2.5",
+          "task": "timing_grid",
+          "windows": 5,
+          "load_s": 4.747179916999812,
+          "median_s": 1.4662484999989829,
+          "median_s_per_window": 0.29324969999979655,
+          "repeats_s": [
+            1.4733033329994214,
+            1.4662484999989829,
+            1.3288477500009321
+          ],
+          "loadavg_1min_before": 2.44189453125,
+          "loadavg_1min_after": 2.44189453125
+        },
+        {
+          "model": "timesfm-3",
+          "task": "timing_retail",
+          "windows": 256,
+          "load_s": 5.173345041001085,
+          "median_s": 2.854799249998905,
+          "median_s_per_window": 0.011151559570308223,
+          "repeats_s": [
+            3.1281240829994204,
+            2.854799249998905,
+            2.8359750830004486
+          ],
+          "loadavg_1min_before": 2.326171875,
+          "loadavg_1min_after": 2.78466796875
+        },
+        {
+          "model": "timesfm-3",
+          "task": "timing_grid",
+          "windows": 5,
+          "load_s": 4.781704458000604,
+          "median_s": 1.4470753329987929,
+          "median_s_per_window": 0.2894150665997586,
+          "repeats_s": [
+            1.6087365410003258,
+            1.4390495829993597,
+            1.4470753329987929
+          ],
+          "loadavg_1min_before": 2.7216796875,
+          "loadavg_1min_after": 2.58349609375
+        },
+        {
+          "model": "t0-gamma",
+          "task": "timing_retail",
+          "windows": 256,
+          "load_s": 2.7858137500006706,
+          "median_s": 1.412885166999331,
+          "median_s_per_window": 0.005519082683591137,
+          "repeats_s": [
+            1.561611459001142,
+            1.412885166999331,
+            1.409175624999989
+          ],
+          "loadavg_1min_before": 2.61669921875,
+          "loadavg_1min_after": 2.48681640625
+        },
+        {
+          "model": "t0-gamma",
+          "task": "timing_grid",
+          "windows": 5,
+          "load_s": 2.7354381659988576,
+          "median_s": 1.2224559999995108,
+          "median_s_per_window": 0.24449119999990215,
+          "repeats_s": [
+            1.1806062089999614,
+            1.2224559999995108,
+            1.2634917499999574
+          ],
+          "loadavg_1min_before": 2.48681640625,
+          "loadavg_1min_after": 2.84814453125
+        }
+      ]
+    }
+  },
+  "sanity": {
+    "readme_example": {
+      "quantiles_shape": [
+        2,
+        1,
+        96,
+        21
+      ],
+      "readme_says": [
+        2,
+        1,
+        96,
+        21
+      ],
+      "quantile_levels": [
+        0.01,
+        0.05,
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3,
+        0.35,
+        0.4,
+        0.45,
+        0.5,
+        0.55,
+        0.6,
+        0.65,
+        0.7,
+        0.75,
+        0.8,
+        0.85,
+        0.9,
+        0.95,
+        0.99
+      ],
+      "median_shape": [
+        2,
+        1,
+        96
+      ]
+    },
+    "batched_vs_direct_timestral_209m": [
+      {
+        "window": 0,
+        "series": "10135",
+        "context_length": 80,
+        "max_abs_diff_median": 1.33514404296875e-05,
+        "median_scale": 10.5621337890625
+      },
+      {
+        "window": 100,
+        "series": "22321",
+        "context_length": 80,
+        "max_abs_diff_median": 7.62939453125e-06,
+        "median_scale": 12.439058303833008
+      },
+      {
+        "window": 500,
+        "series": "90038A",
+        "context_length": 84,
+        "max_abs_diff_median": 0.0,
+        "median_scale": 0.0
+      },
+      {
+        "window": 1000,
+        "series": "82001S",
+        "context_length": 92,
+        "max_abs_diff_median": 1.1444091796875e-05,
+        "median_scale": 11.91935920715332
+      },
+      {
+        "window": 1300,
+        "series": "85104",
+        "context_length": 96,
+        "max_abs_diff_median": 2.9802322387695312e-06,
+        "median_scale": 0.8241347074508667
+      }
+    ],
+    "forecasts": {
+      "fresh/autoets": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "fresh/chronos-2": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 1
+      },
+      "fresh/lightgbm": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "fresh/seasonal-naive": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "fresh/t0-gamma": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "fresh/timesfm-3": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "fresh/timestral-209m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "fresh_promo/chronos-2": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "fresh_promo/lightgbm": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "fresh_promo/t0-gamma": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "fresh_promo/timesfm-3": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "fresh_promo/timestral-209m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_historic/autoets": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_historic/chronos-2": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_historic/ets-aaa": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_historic/lightgbm": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_historic/seasonal-naive": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_historic/t0-beta": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_historic/t0-gamma": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_historic/timesfm-2.5": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_historic/timesfm-3": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_historic/timestral-209m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_historic/timestral-5m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_historic_temp/chronos-2": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_historic_temp/lightgbm": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_historic_temp/t0-beta": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_historic_temp/t0-gamma": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_historic_temp/timesfm-3": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_historic_temp/timestral-209m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_historic_temp/timestral-5m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_leakfree/autoets": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_leakfree/chronos-2": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_leakfree/ets-aaa": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_leakfree/lightgbm": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_leakfree/seasonal-naive": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_leakfree/t0-beta": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_leakfree/t0-gamma": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_leakfree/timesfm-2.5": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_leakfree/timesfm-3": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_leakfree/timestral-209m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_leakfree/timestral-5m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_leakfree_temp/chronos-2": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_leakfree_temp/lightgbm": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_leakfree_temp/t0-beta": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_leakfree_temp/t0-gamma": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_leakfree_temp/timesfm-3": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_leakfree_temp/timestral-209m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_leakfree_temp/timestral-5m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0048/autoets": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0048/chronos-2": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0048/ets-aaa": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0048/lightgbm-context-only": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0048/seasonal-naive": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0048/t0-gamma": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0048/timesfm-2.5": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0048/timesfm-3": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0048/timestral-209m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0048/timestral-5m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0336/autoets": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0336/chronos-2": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0336/ets-aaa": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0336/lightgbm-context-only": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0336/seasonal-naive": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0336/t0-gamma": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0336/timesfm-2.5": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0336/timesfm-3": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0336/timestral-209m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L0336/timestral-5m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L1344/autoets": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L1344/chronos-2": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L1344/ets-aaa": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L1344/lightgbm-context-only": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L1344/seasonal-naive": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L1344/t0-gamma": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L1344/timesfm-2.5": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L1344/timesfm-3": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L1344/timestral-209m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L1344/timestral-5m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L4032/autoets": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L4032/chronos-2": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L4032/ets-aaa": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L4032/lightgbm-context-only": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L4032/seasonal-naive": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L4032/t0-gamma": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L4032/timesfm-2.5": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L4032/timesfm-3": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L4032/timestral-209m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "grid_sweep_L4032/timestral-5m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail/autoets": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail/chronos-2": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 490
+      },
+      "retail/croston": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail/lightgbm": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail/seasonal-naive": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail/t0-beta": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail/t0-gamma": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail/timesfm-2.5": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail/timesfm-3": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail/timestral-209m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail/timestral-5m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail/tsb": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_calendar/timestral-209m+calendar": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L08/autoets": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L08/chronos-2": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 118
+      },
+      "retail_sweep_L08/lightgbm": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L08/seasonal-naive": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L08/t0-gamma": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L08/timesfm-2.5": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L08/timesfm-3": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L08/timestral-209m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L08/timestral-5m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L13/autoets": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L13/chronos-2": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 71
+      },
+      "retail_sweep_L13/lightgbm": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L13/seasonal-naive": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L13/t0-gamma": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L13/timesfm-2.5": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L13/timesfm-3": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L13/timestral-209m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L13/timestral-5m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L26/autoets": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L26/chronos-2": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 132
+      },
+      "retail_sweep_L26/lightgbm": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L26/seasonal-naive": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L26/t0-gamma": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L26/timesfm-2.5": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L26/timesfm-3": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L26/timestral-209m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L26/timestral-5m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L52/autoets": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L52/chronos-2": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 157
+      },
+      "retail_sweep_L52/lightgbm": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L52/seasonal-naive": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L52/t0-gamma": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L52/timesfm-2.5": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L52/timesfm-3": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L52/timestral-209m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L52/timestral-5m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L78/autoets": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L78/chronos-2": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 190
+      },
+      "retail_sweep_L78/lightgbm": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L78/seasonal-naive": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L78/t0-gamma": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L78/timesfm-2.5": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L78/timesfm-3": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L78/timestral-209m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      },
+      "retail_sweep_L78/timestral-5m": {
+        "nan": 0,
+        "ordered": true,
+        "crossings_before_sort": 0
+      }
+    },
+    "seasonal_naive_retail": [
+      {
+        "window": 0,
+        "matches": true
+      },
+      {
+        "window": 100,
+        "matches": true
+      },
+      {
+        "window": 500,
+        "matches": true
+      },
+      {
+        "window": 1000,
+        "matches": true
+      },
+      {
+        "window": 1300,
+        "matches": true
+      }
+    ],
+    "timestral_unseen_indicator_23155": {
+      "context_weeks": 29,
+      "actual": [
+        12.0,
+        36.0,
+        60.0,
+        42.0,
+        24.0,
+        54.0,
+        40.0,
+        21.0
+      ],
+      "none": {
+        "median": [
+          26.0,
+          31.0,
+          27.0,
+          30.0,
+          26.0,
+          29.0,
+          28.0,
+          29.0
+        ],
+        "p90": [
+          73.0,
+          82.0,
+          80.0,
+          83.0,
+          86.0,
+          91.0,
+          91.0,
+          92.0
+        ]
+      },
+      "peak_flag_and_week": {
+        "median": [
+          26.0,
+          34.0,
+          32.0,
+          62.0,
+          51.0,
+          57.0,
+          61.0,
+          62.0
+        ],
+        "p90": [
+          63079.0,
+          327144.0,
+          327145.0,
+          327150.0,
+          327156.0,
+          327160.0,
+          327164.0,
+          327160.0
+        ]
+      },
+      "peak_flag_only": {
+        "median": [
+          29.0,
+          31.0,
+          30.0,
+          37.0,
+          29.0,
+          31.0,
+          33.0,
+          33.0
+        ],
+        "p90": [
+          133.0,
+          216.0,
+          573.0,
+          5348.0,
+          3621.0,
+          6332.0,
+          6186.0,
+          4456.0
+        ]
+      },
+      "week_of_year_only": {
+        "median": [
+          25.0,
+          29.0,
+          26.0,
+          26.0,
+          25.0,
+          25.0,
+          26.0,
+          25.0
+        ],
+        "p90": [
+          70.0,
+          80.0,
+          81.0,
+          82.0,
+          89.0,
+          92.0,
+          95.0,
+          96.0
+        ]
+      }
+    },
+    "autoets_retail_components_20_longest": {
+      "context_lengths": [
+        96
+      ],
+      "components": {
+        "ANNN": 19,
+        "AANN": 1
+      }
+    },
+    "autoets_grid_components": {
+      "2025-01-13T00:00:00+00:00": {
+        "autoets_zzz": "AAND",
+        "ets_aaa": "AAAD"
+      },
+      "2025-04-28T23:00:00+00:00": {
+        "autoets_zzz": "AAND",
+        "ets_aaa": "AAAD"
+      },
+      "2025-07-07T23:00:00+00:00": {
+        "autoets_zzz": "MAND",
+        "ets_aaa": "AAAD"
+      },
+      "2025-10-09T23:00:00+00:00": {
+        "autoets_zzz": "AAND",
+        "ets_aaa": "AAAD"
+      }
     }
   }
 }
