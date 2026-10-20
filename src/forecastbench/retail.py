@@ -34,7 +34,7 @@ class WeeklySales:
     def __init__(self, invoices: Invoices):
         self._invoices = invoices
 
-    def frame(self) -> tuple[pd.DataFrame, dict]:
+    def frame(self) -> tuple[pd.DataFrame, dict, pd.DataFrame]:
         raw = self._invoices.lines()
         notes = {"raw_lines": int(len(raw))}
         d = raw.copy()
@@ -69,15 +69,20 @@ class WeeklySales:
             s = g.set_index("ds")["Quantity"].reindex(span, fill_value=0)
             frames.append(pd.DataFrame({"unique_id": code, "ds": span, "y": s.to_numpy(dtype=float)}))
         out = pd.concat(frames, ignore_index=True)
+        names = (
+            d.dropna(subset=["Description"]).groupby("StockCode")["Description"]
+            .agg(lambda x: x.str.strip().value_counts().index[0]).rename("description").reset_index()
+        )
         notes["products"] = int(out["unique_id"].nunique())
         notes["description"] = (
             "Series start at each product's first week with a sale and are zero-filled to the last full week."
         )
-        return out, notes
+        return out, notes, names
 
 
 def prepare(workbook: Path, cache: Path, out: Path, notes: Path) -> None:
-    frame, info = WeeklySales(Invoices(workbook, cache)).frame()
+    frame, info, names = WeeklySales(Invoices(workbook, cache)).frame()
     out.parent.mkdir(parents=True, exist_ok=True)
     frame.to_parquet(out, index=False)
     notes.write_text(json.dumps(info, indent=2))
+    names.to_parquet(out.parent / "retail_products.parquet", index=False)
