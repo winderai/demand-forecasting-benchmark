@@ -116,3 +116,17 @@ def manifest(sources: list[Source], path: Path) -> None:
     existing = json.loads(path.read_text()) if path.exists() else []
     keep = [e for e in existing if e["name"] not in {x["name"] for x in entries}]
     path.write_text(json.dumps(keep + entries, indent=2))
+
+
+def fresh(raw: Path) -> list[Source]:
+    base = "https://huggingface.co/datasets/Dingdong-Inc/FreshRetailNet-50K/resolve/main/data"
+    return [
+        Source(
+            f"FreshRetailNet-50K {split}",
+            f"{base}/{split}.parquet",
+            "Creative Commons Attribution 4.0 International (CC BY 4.0), as stated on the dataset card",
+            "https://huggingface.co/datasets/Dingdong-Inc/FreshRetailNet-50K",
+            raw / f"freshretailnet_{split}.parquet",
+        )
+        for split in ("train", "eval")
+    ]

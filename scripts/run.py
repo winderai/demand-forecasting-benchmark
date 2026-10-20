@@ -4,6 +4,7 @@ Every default lives here. A finished (task, model) pair is cached; --force rerun
 """
 
 import argparse
+import json
 import os
 import warnings
 from pathlib import Path
@@ -16,6 +17,7 @@ warnings.filterwarnings("ignore")
 
 from forecastbench import contenders as C  # noqa: E402
 from forecastbench.backtest import Run  # noqa: E402
+from forecastbench.fresh import FreshRetail  # noqa: E402
 from forecastbench.windows import GridBacktest, RetailBacktest  # noqa: E402
 
 THREADS = 8
@@ -37,6 +39,8 @@ GRID_HISTORIC_BLOCKS = [("2025-01-13", 7), ("2025-04-28", 7), ("2025-07-07", 7),
 GRID_SWEEP_DAYS = [0, 3, 5]  # Monday, Thursday, Saturday of each block
 GRID_LEAK_FREE_DAYS = ("2026-10-15", 5)
 GRID_SWEEP = [48, 336, 1344, 4032]
+
+FRESH_SERIES = 400
 
 REPOS = {
     "timestral-5m": "mistralai/Timestral-5M",
@@ -97,7 +101,7 @@ def main() -> None:
         help="classical (statsforecast, LightGBM) and neural (torch) models run in separate processes: "
              "LightGBM's and torch's OpenMP runtimes crash each other on macOS",
     )
-    parser.add_argument("--part", choices=["retail", "grid", "all"], default="all")
+    parser.add_argument("--part", choices=["retail", "grid", "fresh", "all"], default="all")
     args = parser.parse_args()
     if args.family == "neural":
         import torch
@@ -156,6 +160,28 @@ def main() -> None:
             (C.TimesFM3("timesfm-3", REPOS["timesfm-3"], 8, True), plain + with_temperature + sweep),
             (C.T0("t0-gamma", REPOS["t0-gamma"], 8, True), plain + with_temperature + sweep),
             (C.T0("t0-beta", REPOS["t0-beta"], 8, True), plain + with_temperature),
+        ]
+        for contender, tasks in jobs:
+            if wanted(contender):
+                run.execute(contender, tasks)
+
+    if args.part in ("fresh", "all"):
+        fresh, notes = FreshRetail(Path("data/raw/freshretailnet_train.parquet"),
+                                   Path("data/raw/freshretailnet_eval.parquet")).windows("fresh", FRESH_SERIES, SEED)
+        Path(args.prepared / "fresh_notes.json").write_text(json.dumps(notes, indent=2))
+        plain = fresh.without_covariates("fresh")
+        promo = fresh.named("fresh_promo")
+        from statsforecast.models import AutoETS
+
+        jobs = [
+            (C.SeasonalNaive("seasonal-naive", 7), [plain]),
+            (C.Statistical("autoets", AutoETS(season_length=7), "AutoETS", "D", 1, True), [plain]),
+            (C.PanelLightGBM("lightgbm", [7, 14, 21, 28], 200, LIGHTGBM_THREADS, SEED, False), [plain]),
+            (C.PanelLightGBM("lightgbm", [7, 14, 21, 28], 200, LIGHTGBM_THREADS, SEED, True), [promo]),
+            (C.Timestral("timestral-209m", REPOS["timestral-209m"], 64, True), [plain, promo]),
+            (C.Chronos2("chronos-2", REPOS["chronos-2"], 256, True), [plain, promo]),
+            (C.TimesFM3("timesfm-3", REPOS["timesfm-3"], 64, True), [plain, promo]),
+            (C.T0("t0-gamma", REPOS["t0-gamma"], 64, True), [plain, promo]),
         ]
         for contender, tasks in jobs:
             if wanted(contender):

@@ -3,6 +3,10 @@
 Every contender has a `name`, a `load()` that returns seconds spent loading (0 for fitted models),
 and a `forecast(windows)` that returns the quantile array. The median (level 0.5, index 4) is every
 model's point forecast.
+
+Model libraries are imported inside each contender, not at the top of this module: LightGBM's and
+torch's OpenMP runtimes crash each other in one process on macOS, so scripts/run.py runs the
+classical and the neural contenders in separate processes and each must import only its own.
 """
 
 from __future__ import annotations
@@ -404,3 +408,57 @@ class T0:
                 )
             out[idx] = np.asarray(f.quantiles.cpu().numpy())
         return out
+
+
+class PanelLightGBM:
+    """Global LightGBM over a daily panel with lags of at least the horizon, so it forecasts in one shot,
+    using the windows' known-in-advance covariates (discount, holiday, activity) when asked."""
+
+    def __init__(self, name: str, lags: list[int], estimators: int, threads: int, seed: int, covariates: bool):
+        self.name = name
+        self._lags = lags
+        self._estimators = estimators
+        self._threads = threads
+        self._seed = seed
+        self._covariates = covariates
+
+    def load(self) -> float:
+        return 0.0
+
+    def forecast(self, windows: Windows) -> np.ndarray:
+        import lightgbm as lgb
+        from mlforecast import MLForecast
+        from mlforecast.lag_transforms import RollingMean
+
+        h = windows.horizon
+        keys = windows.keys()
+        train, future = [], []
+        for i, key in enumerate(keys):
+            n = len(windows.contexts[i])
+            part = pd.DataFrame({"unique_id": key, "ds": windows.context_dates[i], "y": windows.contexts[i]})
+            ahead = pd.DataFrame({"unique_id": key, "ds": windows.target_dates[i]})
+            if self._covariates:
+                for j, name in enumerate(windows.known_names):
+                    part[name] = windows.known[i][j, :n]
+                    ahead[name] = windows.known[i][j, n:]
+            train.append(part)
+            future.append(ahead)
+        models = {
+            f"q{level:.1f}": lgb.LGBMRegressor(
+                objective="quantile", alpha=float(level), n_estimators=self._estimators, learning_rate=0.05,
+                num_leaves=31, min_child_samples=20, subsample=0.8, subsample_freq=1, colsample_bytree=0.8,
+                n_jobs=self._threads, random_state=self._seed, verbose=-1,
+            )
+            for level in LEVELS
+        }
+        mlf = MLForecast(models=models, freq=windows.freq, lags=self._lags,
+                         lag_transforms={h: [RollingMean(window_size=7), RollingMean(window_size=28)]},
+                         date_features=["dayofweek"])
+        mlf.fit(pd.concat(train, ignore_index=True), dropna=False, static_features=[])
+        if self._covariates:
+            pred = mlf.predict(h=h, X_df=pd.concat(future, ignore_index=True))
+        else:
+            pred = mlf.predict(h=h)
+        pred = pred.set_index("unique_id").loc[keys]
+        q = pred[list(models)].to_numpy(dtype=float).reshape(len(keys), h, len(LEVELS))
+        return np.sort(q, axis=-1)

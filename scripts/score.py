@@ -36,7 +36,7 @@ def baseline_task(name: str) -> str:
     if name.startswith("grid_sweep_"):
         return "grid_sweep_L4032"
     return {"retail_calendar": "retail", "grid_historic_temp": "grid_historic",
-            "grid_leakfree_temp": "grid_leakfree"}.get(name, name)
+            "grid_leakfree_temp": "grid_leakfree", "fresh_promo": "fresh"}.get(name, name)
 
 
 def snapshot(repo: str) -> str:

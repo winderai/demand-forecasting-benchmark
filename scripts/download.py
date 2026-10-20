@@ -16,9 +16,9 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--raw", type=Path, default=Path("data/raw"))
     parser.add_argument("--manifest", type=Path, default=Path("data/manifest.json"))
-    parser.add_argument("--only", choices=["retail", "grid", "weather"], nargs="*")
+    parser.add_argument("--only", choices=["retail", "grid", "weather", "fresh"], nargs="*")
     args = parser.parse_args()
-    chosen = set(args.only or ["retail", "grid", "weather"])
+    chosen = set(args.only or ["retail", "grid", "weather", "fresh"])
     files = []
     if "retail" in chosen:
         files += sources.retail(args.raw)
@@ -26,6 +26,8 @@ def main() -> None:
         files += sources.grid(args.raw)
     if "weather" in chosen:
         files += sources.temperature(args.raw, TEMPERATURE_WINDOWS)
+    if "fresh" in chosen:
+        files += sources.fresh(args.raw)
     sources.manifest(files, args.manifest)
     print(f"fetched {len(files)} files into {args.raw}")
 

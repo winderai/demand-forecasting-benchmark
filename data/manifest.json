@@ -78,5 +78,25 @@
     "bytes": 54257,
     "sha256": "7bb53374411ce70d6933d585d13b1cb0e4011a37e90be4aec047bd7472408f8d",
     "downloaded_utc": "2026-10-20T11:56:40+00:00"
+  },
+  {
+    "name": "FreshRetailNet-50K train",
+    "url": "https://huggingface.co/datasets/Dingdong-Inc/FreshRetailNet-50K/resolve/main/data/train.parquet",
+    "page": "https://huggingface.co/datasets/Dingdong-Inc/FreshRetailNet-50K",
+    "licence": "Creative Commons Attribution 4.0 International (CC BY 4.0), as stated on the dataset card",
+    "file": "data/raw/freshretailnet_train.parquet",
+    "bytes": 106436287,
+    "sha256": "6706832db892bbae4969c19d87e07975d2543d2ba7d7d4756360654785de5a3d",
+    "downloaded_utc": "2026-10-20T13:06:53+00:00"
+  },
+  {
+    "name": "FreshRetailNet-50K eval",
+    "url": "https://huggingface.co/datasets/Dingdong-Inc/FreshRetailNet-50K/resolve/main/data/eval.parquet",
+    "page": "https://huggingface.co/datasets/Dingdong-Inc/FreshRetailNet-50K",
+    "licence": "Creative Commons Attribution 4.0 International (CC BY 4.0), as stated on the dataset card",
+    "file": "data/raw/freshretailnet_eval.parquet",
+    "bytes": 8440124,
+    "sha256": "1b118840664280c6b88bffc84c80ee1f54c05d911e354b7599e5da10995e960e",
+    "downloaded_utc": "2026-10-20T13:06:55+00:00"
   }
 ]

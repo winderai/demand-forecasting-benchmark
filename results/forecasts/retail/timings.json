@@ -1,0 +1,74 @@
+{
+  "seasonal-naive": {
+    "load_s": 0.0,
+    "forecast_s": 0.17986737499995797,
+    "windows": 1330,
+    "s_per_window": 0.00013523862781951728,
+    "torch_threads": 8,
+    "loadavg_1min_before": 95.5498046875,
+    "loadavg_1min_after": 95.5498046875,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:01:52+00:00"
+  },
+  "timestral-5m": {
+    "load_s": 0.06968870800028526,
+    "forecast_s": 3.374015917000179,
+    "windows": 1330,
+    "s_per_window": 0.0025368540729324655,
+    "torch_threads": 8,
+    "loadavg_1min_before": 93.58349609375,
+    "loadavg_1min_after": 93.58349609375,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:01:57+00:00"
+  },
+  "timestral-209m": {
+    "load_s": 3.419081458000619,
+    "forecast_s": 50.73920312500013,
+    "windows": 1330,
+    "s_per_window": 0.038149776785714386,
+    "torch_threads": 8,
+    "loadavg_1min_before": 91.8564453125,
+    "loadavg_1min_after": 67.732421875,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:02:55+00:00"
+  },
+  "autoets": {
+    "load_s": 0.0,
+    "forecast_s": 68.21870495800067,
+    "windows": 1330,
+    "s_per_window": 0.0512922593669178,
+    "torch_threads": 8,
+    "loadavg_1min_before": 95.5498046875,
+    "loadavg_1min_after": 65.35107421875,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:03:00+00:00"
+  },
+  "croston": {
+    "load_s": 0.0,
+    "forecast_s": 0.7706121669998538,
+    "windows": 1330,
+    "s_per_window": 0.0005794076443607924,
+    "torch_threads": 8,
+    "loadavg_1min_before": 53.8466796875,
+    "loadavg_1min_after": 52.25732421875,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:03:28+00:00"
+  },
+  "tsb": {
+    "load_s": 0.0,
+    "forecast_s": 0.8037460420000571,
+    "windows": 1330,
+    "s_per_window": 0.00060432033233087,
+    "torch_threads": 8,
+    "loadavg_1min_before": 52.25732421875,
+    "loadavg_1min_after": 52.25732421875,
+    "quantile_crossings_before_sort": 0,
+    "problems": [],
+    "finished_utc": "2026-10-20T13:03:29+00:00"
+  }
+}

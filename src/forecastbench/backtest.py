@@ -86,8 +86,8 @@ class Run:
                 continue
             seconds = time.perf_counter() - start
             q = np.asarray(q, dtype=float)
-            if windows.freq == "W-SUN":
-                q = np.clip(q, 0.0, None)  # units sold cannot be negative: applied to every contender
+            if windows.freq in ("W-SUN", "D"):
+                q = np.clip(q, 0.0, None)  # sales cannot be negative: applied to every contender
             problems = []
             if q.shape != (len(windows), windows.horizon, 9):
                 problems.append(f"shape {q.shape}")
