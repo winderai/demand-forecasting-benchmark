@@ -106,6 +106,9 @@ class Run:
                 "problems": problems,
                 "finished_utc": pd.Timestamp.now(tz="UTC").isoformat(timespec="seconds"),
             }
+            describe = getattr(contender, "notes", None)
+            if describe is not None:
+                timing["model_notes"] = describe()
             store.keep(contender.name, np.sort(q, axis=-1), timing)
             print(f"{contender.name} on {windows.name}: {seconds:.1f}s for {len(windows)} windows "
                   f"(load {load:.1f}s, loadavg {before:.0f}) {problems or ''}", flush=True)

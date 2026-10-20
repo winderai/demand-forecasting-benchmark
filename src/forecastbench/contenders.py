@@ -64,22 +64,33 @@ class Batches:
 
 
 class SeasonalNaive:
-    """Same step one season ago; the last value when the history is shorter than a season."""
+    """The same step one season ago, using the longest season the history covers; else the last value.
 
-    def __init__(self, name: str, season: int):
+    Trailing missing values (a gap between the last observation and the cut-off) are skipped: the
+    forecast for step k reads the season `gap + k` steps after the last observed season.
+    """
+
+    def __init__(self, name: str, seasons: list[int]):
         self.name = name
-        self._season = season
+        self._seasons = sorted(seasons, reverse=True)
 
     def load(self) -> float:
         return 0.0
+
+    def rule(self, length: int) -> str:
+        fit = [s for s in self._seasons if length >= s]
+        return f"same step {fit[0]} steps earlier" if fit else "last value"
 
     def forecast(self, windows: Windows) -> np.ndarray:
         h = windows.horizon
         out = np.zeros((len(windows), h))
         for i, c in enumerate(windows.contexts):
-            c = interpolated(c)
-            if len(c) >= self._season:
-                idx = len(c) - self._season + (np.arange(h) % self._season)
+            last = int(np.max(np.where(np.isfinite(c))[0])) + 1
+            gap = len(c) - last
+            c = interpolated(c[:last])
+            fit = [s for s in self._seasons if len(c) >= s]
+            if fit:
+                idx = len(c) - fit[0] + ((gap + np.arange(h)) % fit[0])
                 out[i] = c[idx]
             else:
                 out[i] = c[-1]
@@ -89,8 +100,9 @@ class SeasonalNaive:
 class Statistical:
     """A statsforecast model fitted per window (AutoETS with intervals; Croston/TSB point only)."""
 
-    def __init__(self, name: str, model, column: str, freq: str, jobs: int, intervals: bool):
+    def __init__(self, name: str, model, column: str, freq: str, jobs: int, intervals: bool, min_length: int = 1):
         self.name = name
+        self._min_length = min_length
         self._model = model
         self._column = column
         self._freq = freq
@@ -104,6 +116,9 @@ class Statistical:
     def forecast(self, windows: Windows) -> np.ndarray:
         from statsforecast import StatsForecast
 
+        shortest = min(len(c) for c in windows.contexts)
+        if shortest < self._min_length:
+            raise ValueError(f"cannot fit: {shortest} observations, this model needs at least {self._min_length}")
         frame = windows.frame()
         frame["y"] = frame.groupby("unique_id")["y"].transform(lambda s: s.interpolate(limit_direction="both"))
         sf = StatsForecast(models=[self._model], freq=self._freq, n_jobs=self._jobs)
@@ -197,8 +212,9 @@ class GridLightGBM:
     """
 
     def __init__(self, name: str, backtest, days: int | None, lags: list[int], estimators: int,
-                 threads: int, seed: int, temperature: bool):
+                 threads: int, seed: int, temperature: bool, min_rows: int = 40):
         self.name = name
+        self._min_rows = min_rows
         self._backtest = backtest
         self._days = days
         self._lags = lags
@@ -226,8 +242,11 @@ class GridLightGBM:
                 train = self._backtest.training(cutoff, self._days)
                 train["y"] = interpolated(train["y"].to_numpy())
             train["unique_id"] = "GB-ND"
+            if len(train) < self._min_rows:
+                raise ValueError(f"cannot fit: {len(train)} rows; LightGBM with min_child_samples=20 needs at "
+                                 f"least {self._min_rows} to make one split")
             lags = [lag for lag in self._lags if lag < len(train)]
-            transforms = {48: [RollingMean(window_size=48), RollingMean(window_size=336)]}
+            transforms = {48: [RollingMean(window_size=48), RollingMean(window_size=336)]} if self._lags else {}
             transforms = {k: [t for t in v if t.window_size + k <= len(train)] for k, v in transforms.items()}
             transforms = {k: v for k, v in transforms.items() if v and k < len(train)}
             models = {
@@ -320,11 +339,14 @@ class Chronos2:
 class TimesFM25:
     """TimesFM 2.5 with the flags from its model card. Covariates need XReg (JAX), so none here."""
 
-    def __init__(self, name: str, repo: str, context: int, batch: int):
+    def __init__(self, name: str, repo: str, context: int, batch: int, horizon: int = 128,
+                 continuous_head: bool = True):
         self.name = name
         self._repo = repo
         self._context = context
         self._batch = batch
+        self._horizon = horizon
+        self._continuous = continuous_head
         self._model = None
 
     def load(self) -> float:
@@ -334,8 +356,8 @@ class TimesFM25:
         self._model = timesfm.TimesFM_2p5_200M_torch.from_pretrained(self._repo, torch_compile=False)
         self._model.compile(
             timesfm.ForecastConfig(
-                max_context=self._context, max_horizon=128, normalize_inputs=True,
-                use_continuous_quantile_head=True, force_flip_invariance=True, infer_is_positive=True,
+                max_context=self._context, max_horizon=self._horizon, normalize_inputs=True,
+                use_continuous_quantile_head=self._continuous, force_flip_invariance=True, infer_is_positive=True,
                 fix_quantile_crossing=True, per_core_batch_size=self._batch,
             )
         )
@@ -462,3 +484,63 @@ class PanelLightGBM:
         pred = pred.set_index("unique_id").loc[keys]
         q = pred[list(models)].to_numpy(dtype=float).reshape(len(keys), h, len(LEVELS))
         return np.sort(q, axis=-1)
+
+
+class RetailTransferLightGBM:
+    """Global LightGBM trained on other products' full histories, applied to each window's short context.
+
+    The new-product case: the model has learned from a catalogue of other products, then forecasts
+    a product from however few weeks it has. Direct multi-horizon quantile models, as RetailLightGBM.
+    """
+
+    def __init__(self, name: str, catalogue: pd.DataFrame, lags: list[int], estimators: int, threads: int,
+                 seed: int):
+        self.name = name
+        self._catalogue = catalogue
+        self._lags = lags
+        self._estimators = estimators
+        self._threads = threads
+        self._seed = seed
+        self._fitted: dict = {}
+
+    def load(self) -> float:
+        return 0.0
+
+    def _model(self, cutoff: pd.Timestamp, freq: str, h: int):
+        import lightgbm as lgb
+        from mlforecast import MLForecast
+        from mlforecast.lag_transforms import ExpandingMean, RollingMean
+
+        if cutoff not in self._fitted:
+            train = self._catalogue[self._catalogue["ds"] <= cutoff]
+            models = {
+                f"q{level:.1f}": lgb.LGBMRegressor(
+                    objective="quantile", alpha=float(level), n_estimators=self._estimators,
+                    learning_rate=0.05, num_leaves=31, min_child_samples=20, subsample=0.8, subsample_freq=1,
+                    colsample_bytree=0.8, n_jobs=self._threads, random_state=self._seed, verbose=-1,
+                )
+                for level in LEVELS
+            }
+            mlf = MLForecast(
+                models=models, freq=freq, lags=self._lags,
+                lag_transforms={1: [RollingMean(window_size=4), RollingMean(window_size=13), ExpandingMean()]},
+                date_features=[week_of_year, "month"],
+            )
+            mlf.fit(train[["unique_id", "ds", "y"]], max_horizon=h, dropna=False)
+            self._fitted[cutoff] = (mlf, list(models))
+        return self._fitted[cutoff]
+
+    def forecast(self, windows: Windows) -> np.ndarray:
+        h = windows.horizon
+        out = np.zeros((len(windows), h, len(LEVELS)))
+        frame = windows.frame()
+        cutoffs = np.array([c.isoformat() for c in windows.cutoffs])
+        keys = windows.keys()
+        for cutoff in sorted(set(cutoffs)):
+            rows = np.where(cutoffs == cutoff)[0]
+            mlf, names = self._model(pd.Timestamp(cutoff), windows.freq, h)
+            wanted = [keys[i] for i in rows]
+            new = frame[frame["unique_id"].isin(wanted)][["unique_id", "ds", "y"]]
+            pred = mlf.predict(h=h, new_df=new).set_index("unique_id").loc[wanted]
+            out[rows] = np.sort(pred[names].to_numpy(dtype=float).reshape(len(rows), h, len(LEVELS)), axis=-1)
+        return out

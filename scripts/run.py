@@ -17,6 +17,7 @@ warnings.filterwarnings("ignore")
 
 from forecastbench import contenders as C  # noqa: E402
 from forecastbench.backtest import Run  # noqa: E402
+from forecastbench import theory  # noqa: E402
 from forecastbench.fresh import FreshRetail  # noqa: E402
 from forecastbench.windows import GridBacktest, RetailBacktest  # noqa: E402
 
@@ -41,6 +42,17 @@ GRID_LEAK_FREE_DAYS = ("2026-10-15", 5)
 GRID_SWEEP = [48, 336, 1344, 4032]
 
 FRESH_SERIES = 400
+
+GRID_FLOOR = [12, 24, 48, 96, 144, 336]
+RETAIL_FLOOR = [1, 2, 4, 8]
+RETAIL_CATALOGUE = 600
+PRIOR_YEAR = ("2024-01-01", "2025-01-01")
+PRIOR_HARMONICS = 6
+PRIOR_THRESHOLDS = [12.0 + 0.5 * i for i in range(13)]
+CONTEXT_HARMONICS = 4
+SUMMER = ("2025-06-01", "2025-09-01")
+EXTRAP_END = "2025-12-01"
+EXTRAP_SCORED_FROM = "2025-10-01"
 
 REPOS = {
     "timestral-5m": "mistralai/Timestral-5M",
@@ -109,7 +121,7 @@ def main() -> None:
         help="classical (statsforecast, LightGBM) and neural (torch) models run in separate processes: "
              "LightGBM's and torch's OpenMP runtimes crash each other on macOS",
     )
-    parser.add_argument("--part", choices=["retail", "grid", "fresh", "all"], default="all")
+    parser.add_argument("--part", choices=["retail", "grid", "fresh", "floor", "extrapolation", "all"], default="all")
     args = parser.parse_args()
     if args.family == "neural":
         import torch
@@ -130,7 +142,7 @@ def main() -> None:
         from statsforecast.models import TSB, AutoETS, CrostonOptimized
 
         jobs = [
-            (C.SeasonalNaive("seasonal-naive", 52), [plain] + sweep),
+            (C.SeasonalNaive("seasonal-naive", [52]), [plain] + sweep),
             (C.Statistical("autoets", AutoETS(season_length=52), "AutoETS", "W-SUN", 1, True), [plain] + sweep),
             (C.Statistical("croston", CrostonOptimized(), "CrostonOptimized", "W-SUN", 1, False), [plain]),
             (C.Statistical("tsb", TSB(alpha_d=0.1, alpha_p=0.1), "TSB", "W-SUN", 1, False), [plain]),
@@ -156,7 +168,7 @@ def main() -> None:
 
         lags = [48, 96, 144, 336, 672]
         jobs = [
-            (C.SeasonalNaive("seasonal-naive", 336), plain + sweep),
+            (C.SeasonalNaive("seasonal-naive", [336]), plain + sweep),
             (C.Statistical("autoets", AutoETS(season_length=48), "AutoETS", "30min", THREADS, True), plain + sweep),
             (C.Statistical("ets-aaa", AutoETS(season_length=48, model="AAA"), "AutoETS", "30min", 1, True), plain + sweep),
             (C.GridLightGBM("lightgbm", backtest, GRID_TRAINING_DAYS, lags, 200, LIGHTGBM_THREADS, SEED, False), plain),
@@ -183,7 +195,7 @@ def main() -> None:
         from statsforecast.models import AutoETS
 
         jobs = [
-            (C.SeasonalNaive("seasonal-naive", 7), [plain]),
+            (C.SeasonalNaive("seasonal-naive", [7]), [plain]),
             (C.Statistical("autoets", AutoETS(season_length=7), "AutoETS", "D", 1, True), [plain]),
             (C.PanelLightGBM("lightgbm", [7, 14, 21, 28], 200, LIGHTGBM_THREADS, SEED, False), [plain]),
             (C.PanelLightGBM("lightgbm", [7, 14, 21, 28], 200, LIGHTGBM_THREADS, SEED, True), [promo]),
@@ -195,6 +207,147 @@ def main() -> None:
         for contender, tasks in jobs:
             if wanted(contender):
                 run.execute(contender, tasks)
+
+    if args.part in ("floor", "all"):
+        floor(args, run, wanted)
+    if args.part in ("extrapolation", "all"):
+        extrapolation(args, run, wanted)
+
+
+def prior_structure(prepared: Path) -> theory.PriorStructure:
+    g = pd.read_parquet(prepared / "grid_halfhourly.parquet")
+    start, end = (pd.Timestamp(d, tz="Europe/London") for d in PRIOR_YEAR)
+    year = g[(g["ds"] >= start) & (g["ds"] < end)]
+    return theory.PriorStructure(pd.DatetimeIndex(year["ds"]), year["ND"].to_numpy(float),
+                                 year["temperature"].to_numpy(float), PRIOR_HARMONICS, PRIOR_THRESHOLDS)
+
+
+def neural_grid(covariates: bool):
+    return [
+        C.Timestral("timestral-5m", REPOS["timestral-5m"], 8, covariates),
+        C.Timestral("timestral-209m", REPOS["timestral-209m"], 8, covariates),
+        C.Chronos2("chronos-2", REPOS["chronos-2"], 64, covariates),
+        C.TimesFM3("timesfm-3", REPOS["timesfm-3"], 8, covariates),
+        C.T0("t0-gamma", REPOS["t0-gamma"], 8, covariates),
+        C.T0("t0-beta", REPOS["t0-beta"], 8, covariates),
+    ]
+
+
+def floor(args, run, wanted) -> None:
+    from statsforecast.models import AutoETS
+
+    _, historic, _, _ = grid_tasks(args.prepared)
+    with_temp = [historic.truncated(f"grid_floor_L{n:04d}_temp", n) for n in GRID_FLOOR]
+    plain = [w.without_covariates(w.name.replace("_temp", "")) for w in with_temp]
+    structure = prior_structure(args.prepared)
+    lags = [48, 96, 144, 336, 672]
+    jobs = [
+        (C.SeasonalNaive("seasonal-naive", [336, 48]), plain),
+        (C.Statistical("ets-aaa", AutoETS(season_length=48, model="AAA"), "AutoETS", "30min", 1, True, 96), plain),
+        (C.GridLightGBM("lightgbm-context-only", None, None, lags, 200, LIGHTGBM_THREADS, SEED, False), plain),
+        (C.GridLightGBM("lightgbm-context-only", None, None, lags, 200, LIGHTGBM_THREADS, SEED, True), with_temp),
+        (theory.TheoryContext("theory-context", CONTEXT_HARMONICS), with_temp),
+        (theory.TheoryPrior("theory-prior-2024", structure), with_temp),
+        (C.TimesFM25("timesfm-2.5", REPOS["timesfm-2.5"], 384, 8), plain),
+    ]
+    jobs += [(m, plain + with_temp) for m in neural_grid(True)]
+    for contender, tasks in jobs:
+        if wanted(contender):
+            run.execute(contender, tasks)
+
+    retail, sweep = retail_tasks(args.prepared, args.products, args.sweep_products)
+    sweep_base = sweep[-1]
+    main = retail.without_covariates("retail")
+    tasks = [sweep_base.truncated(f"retail_floor_L{n:02d}", n) for n in RETAIL_FLOOR]
+    tasks += [main.truncated(f"retail300_floor_L{n:02d}", n) for n in RETAIL_FLOOR]
+    weekly = pd.read_parquet(args.prepared / "retail_weekly.parquet")
+    sampled = set(main.ids)
+    others = np.sort(np.array([c for c in weekly["unique_id"].unique() if c not in sampled]))
+    rng = np.random.default_rng(SEED)
+    catalogue_codes = set(rng.choice(others, size=RETAIL_CATALOGUE, replace=False))
+    catalogue = weekly[weekly["unique_id"].isin(catalogue_codes)]
+    (args.prepared / "retail_catalogue_notes.json").write_text(json.dumps({
+        "products": RETAIL_CATALOGUE, "drawn_from": int(len(others)), "seed": SEED,
+        "note": "LightGBM-transfer trains on these products' full histories up to each cut-off; none of "
+                "them is in the 300-product evaluation sample",
+    }, indent=2))
+    jobs = [
+        (C.SeasonalNaive("seasonal-naive", [52]), tasks),
+        (C.Statistical("autoets", AutoETS(season_length=52), "AutoETS", "W-SUN", 1, True, 7), tasks),
+        (C.RetailTransferLightGBM("lightgbm-transfer", catalogue, [1, 2, 3, 4, 8, 13, 26, 52], 200,
+                                  LIGHTGBM_THREADS, SEED), tasks),
+        (C.Timestral("timestral-5m", REPOS["timestral-5m"], 64, False), tasks),
+        (C.Timestral("timestral-209m", REPOS["timestral-209m"], 64, False), tasks),
+        (C.Chronos2("chronos-2", REPOS["chronos-2"], 256, False), tasks),
+        (C.TimesFM25("timesfm-2.5", REPOS["timesfm-2.5"], 128, 64), tasks),
+        (C.TimesFM3("timesfm-3", REPOS["timesfm-3"], 64, False), tasks),
+        (C.T0("t0-gamma", REPOS["t0-gamma"], 64, False), tasks),
+        (C.T0("t0-beta", REPOS["t0-beta"], 64, False), tasks),
+    ]
+    for contender, chosen in jobs:
+        if wanted(contender):
+            run.execute(contender, chosen)
+
+
+def extrapolation_windows(prepared: Path):
+    from forecastbench.windows import Windows
+
+    g = pd.read_parquet(prepared / "grid_halfhourly.parquet").set_index("ds")
+    start, cut, end, scored = (pd.Timestamp(d, tz="Europe/London").tz_convert("UTC")
+                               for d in (SUMMER[0], SUMMER[1], EXTRAP_END, EXTRAP_SCORED_FROM))
+    ctx = g.loc[(g.index >= start) & (g.index < cut)]
+    ahead = g.loc[(g.index >= cut) & (g.index < end)]
+    targets = ahead["ND"].to_numpy(float).copy()
+    targets[ahead.index < scored] = np.nan
+    temps = np.concatenate([ctx["temperature"].to_numpy(float), ahead["temperature"].to_numpy(float)])[None]
+    y = ctx["ND"].to_numpy(float)
+    long = Windows("extrap_long_temp", "30min", len(ahead), 48, ["GB-ND"], [cut], [y], targets[None],
+                   [ahead.index], [y], [temps], ["temperature"], [ctx.index])
+    days = pd.date_range(EXTRAP_SCORED_FROM, EXTRAP_END, freq="D", tz="Europe/London", inclusive="left")
+    ids, cuts, contexts, tgts, tdates, known, cdates = [], [], [], [], [], [], []
+    for day in days:
+        d = day.tz_convert("UTC")
+        frame = g.loc[(g.index >= start) & (g.index < d)]
+        values = frame["ND"].to_numpy(float).copy()
+        values[frame.index >= cut] = np.nan
+        target = g.loc[g.index >= d].iloc[:48]
+        ids.append("GB-ND")
+        cuts.append(d)
+        contexts.append(values)
+        tgts.append(target["ND"].to_numpy(float))
+        tdates.append(target.index)
+        known.append(np.concatenate([frame["temperature"].to_numpy(float), target["temperature"].to_numpy(float)])[None])
+        cdates.append(frame.index)
+    dayahead = Windows("extrap_dayahead_temp", "30min", 48, 48, ids, cuts, contexts, np.array(tgts), tdates,
+                       [y] * len(ids), known, ["temperature"], cdates)
+    return long, dayahead
+
+
+def extrapolation(args, run, wanted) -> None:
+    from statsforecast.models import AutoETS
+
+    long_temp, day_temp = extrapolation_windows(args.prepared)
+    long_plain = long_temp.without_covariates("extrap_long")
+    day_plain = day_temp.without_covariates("extrap_dayahead")
+    structure = prior_structure(args.prepared)
+    jobs = [
+        (C.SeasonalNaive("seasonal-naive", [336]), [long_plain, day_plain]),
+        (C.Statistical("ets-aaa", AutoETS(season_length=48, model="AAA"), "AutoETS", "30min", 1, True), [long_plain]),
+        (C.Statistical("autoets", AutoETS(season_length=48), "AutoETS", "30min", 1, True), [long_plain]),
+        (C.GridLightGBM("lightgbm-no-lags", None, None, [], 200, LIGHTGBM_THREADS, SEED, False), [long_plain]),
+        (C.GridLightGBM("lightgbm-no-lags", None, None, [], 200, LIGHTGBM_THREADS, SEED, True), [long_temp]),
+        (theory.TheoryContext("theory-context", CONTEXT_HARMONICS), [long_temp, day_temp]),
+        (theory.TheoryPrior("theory-prior-2024", structure), [long_temp, day_temp]),
+        (C.TimesFM25("timesfm-2.5", REPOS["timesfm-2.5"], 4608, 1, 4416, False), [long_plain]),
+    ]
+    for m in neural_grid(True):
+        tasks = [long_plain, long_temp]
+        if not isinstance(m, C.TimesFM3):  # TimesFM 3 returns a flat line across a gap of missing values
+            tasks += [day_plain, day_temp]
+        jobs.append((m, tasks))
+    for contender, tasks in jobs:
+        if wanted(contender):
+            run.execute(contender, tasks)
 
 
 if __name__ == "__main__":
